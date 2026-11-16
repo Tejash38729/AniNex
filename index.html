@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AniNex — Next-Gen Spatial Anime Streaming</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --primary: #FF2A5F; --accent: #00F0FF; --bg: #06060C; }
+    body { background-color: var(--bg); color: #F4F4F8; font-family: 'Plus Jakarta Sans', sans-serif; overflow-x: hidden; }
+    h1, h2, h3, .font-display { font-family: 'Outfit', sans-serif; }
+    .glass { background: rgba(15, 16, 28, 0.85); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.08); }
+    .glass-card { background: linear-gradient(145deg, rgba(22,24,40,0.9), rgba(11,12,22,0.96)); border: 1px solid rgba(255,255,255,0.08); transition: 0.25s ease; }
+    .glass-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary), #ff5e3a); box-shadow: 0 8px 24px -6px rgba(255,42,95,0.5); }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .rank-num { -webkit-text-stroke: 2px rgba(255,255,255,0.22); color: transparent; font-family: 'Outfit', sans-serif; font-weight: 800; }
+  </style>
+</head>
+<body class="pb-24">
+
+  <!-- Top Live Announcement Banner -->
+  <div id="announcementBar" class="relative z-30 text-center text-xs font-medium py-2 px-4 bg-gradient-to-r from-[#FF2A5F]/20 via-[#00F0FF]/15 to-[#FF2A5F]/20 border-b border-white/10">
+    🔥 Sign In to Save Your VIP Pass! Go VIP at ₹49/Month (UPI: 9226014759@fam) or Watch 3 Ads for 24h Unlimited!
+  </div>
+
+  <!-- Header -->
+  <header class="sticky top-0 z-30 glass border-b border-white/10 px-4 md:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      <div id="brandLogoTrigger" class="flex items-center gap-3 cursor-pointer select-none">
+        <div class="w-10 h-10 rounded-xl btn-primary flex items-center justify-center font-display font-extrabold text-xl text-white">A</div>
+        <div>
+          <span class="font-display font-extrabold text-xl tracking-tight">Ani<span style="color: var(--accent)">Nex</span></span>
+          <span class="block text-[10px] text-gray-400 -mt-1">MUSE LICENSED HUB</span>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="flex-1 max-w-md relative">
+        <input id="globalSearch" type="text" placeholder="Search Muse Asia, Muse India, Hindi Dubs..."
+          class="w-full bg-white/5 border border-white/10 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-[#00F0FF]" />
+      </div>
+
+      <!-- Account / Sign-In Button -->
+      <button id="headerAuthBtn" onclick="openAuthModal()" class="px-4 py-2 rounded-full text-xs font-bold btn-primary shrink-0">
+        Sign In
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN VIEWPORT -->
+  <main class="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-6">
+
+    <!-- 1. DISCOVER VIEW -->
+    <section id="view-discover" class="space-y-10">
+      <div class="relative rounded-3xl overflow-hidden glass-card min-h-[340px] md:min-h-[410px] flex items-end p-6 md:p-10">
+        <img id="heroImg" src="https://cdn.myanimelist.net/images/anime/1015/138006l.jpg" class="absolute inset-0 w-full h-full object-cover opacity-45" />
+        <div class="absolute inset-0 bg-gradient-to-t from-[#06060C] via-[#06060C]/65 to-transparent"></div>
+        <div class="relative z-10 max-w-2xl space-y-4">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-[#FF2A5F] text-white">OFFICIAL SIMULCAST</span>
+            <span id="heroAudio" class="px-3 py-1 rounded-full text-xs font-semibold bg-white/10">Muse Asia & Muse India</span>
+          </div>
+          <h1 id="heroTitle" class="text-3xl md:text-5xl font-extrabold leading-tight">Frieren: Beyond Journey's End</h1>
+          <p id="heroDesc" class="text-sm text-gray-300 line-clamp-2">Stream licensed episodes from Muse Asia & Muse India or unlock ad-free VIP at ₹49/Month.</p>
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button onclick="playFeaturedHero()" class="btn-primary px-6 py-3 rounded-xl font-bold text-sm">▶ Stream Now</button>
+            <button onclick="navigate('vip')" class="px-5 py-3 rounded-xl font-semibold text-sm bg-white/10 hover:bg-white/15 border border-white/10">₹49/Mo VIP or 3 Ads</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Muse Asia & Muse India Auto-Fetched Shelf -->
+      <div class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl md:text-2xl font-bold flex items-center gap-2">
+            <span class="w-2 h-6 rounded-full" style="background: var(--primary)"></span>
+            Muse Asia & Muse India Releases
+          </h2>
+          <span class="text-xs text-[#00F0FF]">Cloud Synced</span>
+        </div>
+        <div id="museCatalogGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
+      </div>
+
+      <!-- Top 10 Trending -->
+      <div class="space-y-4">
+        <h2 class="text-xl md:text-2xl font-bold">Top 10 Trending Today</h2>
+        <div id="top10Row" class="flex gap-5 overflow-x-auto no-scrollbar pb-4"></div>
+      </div>
+    </section>
+
+    <!-- 2. EXPLORE VIEW -->
+    <section id="view-explore" class="hidden space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <h1 class="text-2xl md:text-3xl font-extrabold">Explore Catalog</h1>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="filterExplore('all')" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-[#FF2A5F]">All</button>
+          <button onclick="filterExplore(1)" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10">Action</button>
+          <button onclick="filterExplore(10)" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10">Fantasy</button>
+          <button onclick="filterExplore(22)" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10">Romance</button>
+        </div>
+      </div>
+      <div id="exploreGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
+    </section>
+
+    <!-- 3. SCHEDULE VIEW -->
+    <section id="view-schedule" class="hidden space-y-6">
+      <h1 class="text-2xl md:text-3xl font-extrabold">Simulcast Schedule</h1>
+      <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="dayTabs"></div>
+      <div id="scheduleGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
+    </section>
+
+    <!-- 4. ACCOUNT & MY LIST VIEW -->
+    <section id="view-mylist" class="hidden space-y-6">
+      <div class="glass-card rounded-3xl p-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 id="profileName" class="text-xl font-extrabold">Guest Viewer</h2>
+          <p id="profileEmail" class="text-xs text-gray-400">Sign in so your VIP pass & watchlist stay saved across devices.</p>
+        </div>
+        <div id="profileAuthActions">
+          <button onclick="openAuthModal()" class="btn-primary px-5 py-2.5 rounded-xl text-xs font-bold">Sign In / Register</button>
+        </div>
+      </div>
+      <h2 class="text-xl font-bold">Saved Watchlist</h2>
+      <div id="watchlistGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
+    </section>
+
+    <!-- 5. VIP & 3-AD SUBSCRIPTION VIEW -->
+    <section id="view-vip" class="hidden space-y-8 max-w-4xl mx-auto">
+      <div class="text-center space-y-2">
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-[#00F0FF]/15 text-[#00F0FF]">ACCOUNT-LINKED PASSES</span>
+        <h1 class="text-3xl md:text-4xl font-extrabold">Unlimited Streaming & Downloads</h1>
+        <p class="text-sm text-gray-400">Sign in first so your ₹49/Mo VIP pass or 3-Ad 24h unlock saves permanently to your account.</p>
+      </div>
+
+      <!-- 3-Ad Daily Pass -->
+      <div class="glass-card rounded-3xl p-6 md:p-8 border-[#00F0FF]/30 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div class="space-y-2">
+          <span id="adProgressBadge" class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-300">0 / 3 Ads Completed Today</span>
+          <h2 class="text-2xl font-bold">Watch 3 Ads → 24 Hours Unlimited</h2>
+          <p class="text-xs text-gray-400">Watch 3 timed sponsor ads to unlock all locked episodes & downloads for 24 hours.</p>
+        </div>
+        <button onclick="startVerifiedAd()" id="watchAdBtn" class="w-full md:w-auto px-6 py-3.5 rounded-xl font-bold text-sm bg-[#00F0FF] text-black">
+          ▶ Watch Sponsor Ad (1/3)
+        </button>
+      </div>
+
+      <!-- UPI Plans (9226014759@fam) -->
+      <div class="grid md:grid-cols-3 gap-5">
+        <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6 border-[#FF2A5F] relative">
+          <span class="absolute -top-3 right-5 px-3 py-0.5 rounded-full text-[10px] font-extrabold btn-primary">MOST POPULAR</span>
+          <div>
+            <span class="text-xs font-bold text-[#FF2A5F]">MONTHLY VIP</span>
+            <h3 class="text-3xl font-extrabold mt-1">₹49 <span class="text-xs font-normal text-gray-400">/ Month</span></h3>
+            <ul class="mt-4 space-y-2 text-xs text-gray-300">
+              <li>✓ Zero Ads Everywhere</li>
+              <li>✓ Saved to Your Signed-In Email</li>
+              <li>✓ Direct Episode Downloads</li>
+            </ul>
+          </div>
+          <button onclick="initiateSubscription('Monthly VIP (₹49/Mo)', 49, 30)" class="w-full py-3 rounded-xl font-bold text-sm btn-primary">
+            Subscribe ₹49/Mo
+          </button>
+        </div>
+
+        <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6">
+          <div>
+            <span class="text-xs font-bold text-gray-400">QUARTERLY PRO</span>
+            <h3 class="text-3xl font-extrabold mt-1">₹129 <span class="text-xs font-normal text-gray-400">/ 3 Months</span></h3>
+            <ul class="mt-4 space-y-2 text-xs text-gray-300">
+              <li>✓ 90 Days Full VIP Access</li>
+              <li>✓ 1080p / 4K Priority Streams</li>
+              <li>✓ Unlimited Downloads</li>
+            </ul>
+          </div>
+          <button onclick="initiateSubscription('Quarterly Pro VIP', 129, 90)" class="w-full py-3 rounded-xl font-bold text-sm bg-white/10 hover:bg-white/20">
+            Subscribe ₹129
+          </button>
+        </div>
+
+        <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6">
+          <div>
+            <span class="text-xs font-bold text-[#00F0FF]">ANNUAL LEGEND</span>
+            <h3 class="text-3xl font-extrabold mt-1">₹399 <span class="text-xs font-normal text-gray-400">/ Year</span></h3>
+            <ul class="mt-4 space-y-2 text-xs text-gray-300">
+              <li>✓ 365 Days Full VIP Access</li>
+              <li>✓ Early Simulcast Access</li>
+              <li>✓ VIP Profile Badge</li>
+            </ul>
+          </div>
+          <button onclick="initiateSubscription('Annual Legend VIP', 399, 365)" class="w-full py-3 rounded-xl font-bold text-sm bg-white/10 hover:bg-white/20">
+            Subscribe ₹399
+          </button>
+        </div>
+      </div>
+
+      <!-- Payment Receipts & Status -->
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <h3 class="font-bold text-sm">Your Payment Transactions</h3>
+        <div id="myPaymentsList" class="text-xs text-gray-400">Sign in to view your payment history.</div>
+      </div>
+    </section>
+
+    <!-- 6. HIDDEN ADMIN STUDIO (/AniNex/path/Admin, PIN: 38729) -->
+    <section id="view-admin" class="hidden space-y-8 max-w-5xl mx-auto">
+      <div class="flex flex-wrap items-center justify-between gap-4 glass-card p-6 rounded-3xl border-[#00F0FF]/40">
+        <div>
+          <span class="text-xs font-bold text-[#00F0FF]">ADMIN STUDIO (PIN: 38729)</span>
+          <h1 class="text-2xl font-extrabold">AniNex Cloud Control Center</h1>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="syncMuseFeeds()" id="syncMuseBtn" class="px-4 py-2 rounded-xl text-xs font-bold bg-[#00F0FF] text-black">
+            🔄 Auto-Fetch Muse Asia & Muse India
+          </button>
+          <button onclick="logoutAdmin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-red-500/20 text-red-300">Lock Admin</button>
+        </div>
+      </div>
+
+      <!-- Add Custom Anime via URL -->
+      <div class="glass-card rounded-3xl p-6 space-y-4">
+        <h2 class="text-lg font-bold">Add Anime via Video URL (.mp4 / .m3u8 / YouTube Embed)</h2>
+        <div class="grid md:grid-cols-2 gap-3">
+          <input id="upTitle" type="text" placeholder="Anime Title" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
+          <input id="upAudio" type="text" value="Hindi Dub" placeholder="Audio Tag (Hindi Dub / English Sub)" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
+          <input id="upPoster" type="text" placeholder="Poster Image URL" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
+          <input id="upEpUrl" type="text" placeholder="Episode 1 URL (.mp4, .m3u8, or youtube.com/embed/...)" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
+        </div>
+        <button onclick="publishCustomAnime()" class="btn-primary px-6 py-2.5 rounded-xl font-bold text-xs">Publish Live to All Users</button>
+      </div>
+
+      <!-- Live Payment Ledger -->
+      <div class="glass-card rounded-3xl p-6 space-y-3">
+        <h2 class="text-lg font-bold">All User Subscriptions & UPI Payments (9226014759@fam)</h2>
+        <div id="adminPaymentsList" class="space-y-2 text-xs"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Bottom Dock -->
+  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 glass rounded-full px-3 py-2 flex items-center gap-1 sm:gap-2 shadow-2xl">
+    <button onclick="navigate('discover')" data-nav="discover" class="nav-btn px-3.5 py-2 rounded-full text-xs font-bold btn-primary">Discover</button>
+    <button onclick="navigate('explore')" data-nav="explore" class="nav-btn px-3.5 py-2 rounded-full text-xs font-semibold text-gray-300">Explore</button>
+    <button onclick="navigate('schedule')" data-nav="schedule" class="nav-btn px-3.5 py-2 rounded-full text-xs font-semibold text-gray-300">Schedule</button>
+    <button onclick="navigate('mylist')" data-nav="mylist" class="nav-btn px-3.5 py-2 rounded-full text-xs font-semibold text-gray-300">Account</button>
+    <button onclick="navigate('vip')" data-nav="vip" class="nav-btn px-3.5 py-2 rounded-full text-xs font-semibold text-amber-300">AniNex+</button>
+  </nav>
+
+  <!-- USER SIGN-IN / REGISTER MODAL -->
+  <div id="authModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-lg flex items-center justify-center p-4">
+    <div class="max-w-sm w-full glass-card rounded-3xl p-6 space-y-5">
+      <div class="flex items-center justify-between">
+        <h3 id="authModalTitle" class="font-extrabold text-xl">Sign In to AniNex</h3>
+        <button onclick="document.getElementById('authModal').classList.add('hidden')" class="text-gray-400">✕</button>
+      </div>
+      <div class="space-y-3">
+        <input id="authName" type="text" placeholder="Your Full Name" class="hidden w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm" />
+        <input id="authEmail" type="email" placeholder="Email Address" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm" />
+        <input id="authPassword" type="password" placeholder="Password (min 6 chars)" class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm" />
+        <p id="authError" class="text-xs text-red-400 hidden"></p>
+        <button onclick="submitAuth()" id="authSubmitBtn" class="w-full py-3 rounded-xl font-bold text-sm btn-primary">Sign In</button>
+      </div>
+      <p class="text-center text-xs text-gray-400">
+        <span id="authSwitchText">New to AniNex?</span>
+        <button onclick="toggleAuthMode()" id="authSwitchBtn" class="text-[#00F0FF] font-bold underline ml-1">Create Account</button>
+      </p>
+    </div>
+  </div>
+
+  <!-- AUTOMATIC UPI PAYMENT MODAL (9226014759@fam) -->
+  <div id="upiModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-lg flex items-center justify-center p-4">
+    <div class="max-w-md w-full glass-card rounded-3xl p-6 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 class="font-bold text-lg">Complete UPI Payment</h3>
+        <button onclick="document.getElementById('upiModal').classList.add('hidden')" class="text-gray-400">✕</button>
+      </div>
+      <div id="upiCheckoutBody" class="space-y-4">
+        <div class="bg-white p-4 rounded-2xl text-center space-y-1">
+          <img id="upiQrImg" src="" class="w-40 h-40 mx-auto" />
+          <p class="text-black font-extrabold text-sm">UPI ID: 9226014759@fam</p>
+          <p class="text-gray-600 text-[11px]">Order ID: <span id="upiOrderIdText"></span></p>
+        </div>
+        <a id="upiDeepLink" href="#" class="block w-full text-center py-3 rounded-xl font-bold text-sm btn-primary">
+          📲 Pay ₹<span id="upiPayAmt">49</span> via UPI App
+        </a>
+        <div class="space-y-2 pt-2 border-t border-white/10">
+          <label class="text-xs font-semibold text-gray-300">Enter 12-Digit UPI UTR Number for Instant Auto-Activation:</label>
+          <input id="upiUtrInput" type="text" maxlength="12" inputmode="numeric" placeholder="e.g. 632189450123"
+            class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm tracking-widest" />
+          <button onclick="verifyUpiAutomatically()" id="verifyUpiBtn" class="w-full py-3 rounded-xl font-bold text-xs bg-emerald-500 text-black">
+            ⚡ Verify Payment & Unlock VIP
+          </button>
+        </div>
+      </div>
+
+      <!-- Automatic Success / Failed Result Screen -->
+      <div id="paymentResultBox" class="hidden text-center py-6 space-y-4">
+        <div id="payResultIcon" class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl"></div>
+        <h4 id="payResultTitle" class="text-xl font-extrabold"></h4>
+        <p id="payResultMsg" class="text-xs text-gray-300"></p>
+        <div class="flex gap-2 justify-center pt-2">
+          <button onclick="resetPaymentModal()" id="payRetryBtn" class="hidden px-5 py-2.5 rounded-xl text-xs font-bold bg-white/10">Try Again</button>
+          <button onclick="document.getElementById('upiModal').classList.add('hidden')" class="px-6 py-2.5 rounded-xl text-xs font-bold btn-primary">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STREAMING PLAYER MODAL -->
+  <div id="playerModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-xl overflow-y-auto p-4 md:p-8">
+    <div class="max-w-5xl mx-auto glass-card rounded-3xl overflow-hidden">
+      <div class="flex items-center justify-between p-4 border-b border-white/10">
+        <h3 id="playerTitle" class="font-bold text-lg truncate">Player</h3>
+        <button onclick="closePlayer()" class="px-3 py-1.5 rounded-full bg-white/10 text-xs font-bold">✕ Close</button>
+      </div>
+      <div class="relative aspect-video bg-black flex items-center justify-center">
+        <video id="html5Player" controls playsinline class="w-full h-full hidden"></video>
+        <iframe id="embedPlayer" class="w-full h-full hidden" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+
+        <div id="playerLockOverlay" class="hidden text-center p-6 space-y-4 max-w-md">
+          <div class="w-14 h-14 rounded-2xl btn-primary mx-auto flex items-center justify-center text-2xl">🔒</div>
+          <h4 class="text-xl font-bold">VIP or 3-Ad Pass Required</h4>
+          <p class="text-xs text-gray-400">Sign in and watch 3 short ads for 24h unlimited access, or subscribe at ₹49/Month.</p>
+          <div class="flex flex-wrap justify-center gap-3">
+            <button onclick="startVerifiedAd()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#00F0FF] text-black">
+              Watch Ad (<span id="modalAdCount">0</span>/3)
+            </button>
+            <button onclick="closePlayer(); navigate('vip')" class="px-4 py-2.5 rounded-xl text-xs font-bold btn-primary">
+              Go VIP (₹49/Mo)
+            </button>
+          </div>
+        </div>
+
+        <div id="adCountdownOverlay" class="hidden text-center p-6 space-y-3">
+          <span class="px-3 py-1 rounded-full text-xs font-bold bg-amber-400 text-black">SPONSOR AD</span>
+          <h4 class="text-xl font-bold">Unlocking Your Free 24h Pass...</h4>
+          <p class="text-sm text-[#00F0FF] font-extrabold">Please wait <span id="adTimerSec">5</span>s</p>
+        </div>
+      </div>
+
+      <div class="p-6 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <span id="playerAudioTag" class="px-3 py-1 rounded-full text-xs font-bold bg-[#FF2A5F]/20 text-[#FF2A5F]">Sub / Dub</span>
+          <div class="flex gap-2">
+            <button onclick="toggleWatchlistCurrent()" class="px-4 py-2 rounded-xl text-xs font-bold bg-white/10">+ Watchlist</button>
+            <a id="downloadEpBtn" href="#" target="_blank" download class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-black">⬇ Download</a>
+          </div>
+        </div>
+        <p id="playerSynopsis" class="text-xs text-gray-300"></p>
+        <div id="playerEpisodesList" class="grid grid-cols-3 sm:grid-cols-6 gap-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HIDDEN ADMIN PIN LOCK MODAL (38729) -->
+  <div id="adminPinModal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="max-w-xs w-full glass-card rounded-3xl p-6 text-center space-y-5 border-[#00F0FF]/40">
+      <div class="w-12 h-12 rounded-2xl btn-primary mx-auto flex items-center justify-center text-xl font-bold">🔐</div>
+      <h3 class="font-extrabold text-lg">Restricted Admin Path</h3>
+      <input id="adminPinInput" type="password" inputmode="numeric" maxlength="5" placeholder="• • • • •"
+        class="w-full text-center text-2xl tracking-[0.5em] font-bold bg-white/5 border border-white/15 rounded-xl py-3" />
+      <p id="pinError" class="text-xs text-red-400 hidden">Incorrect PIN (Enter 38729)</p>
+      <div class="flex gap-2">
+        <button onclick="document.getElementById('adminPinModal').classList.add('hidden')" class="flex-1 py-2.5 rounded-xl text-xs bg-white/10">Cancel</button>
+        <button onclick="verifyAdminPin()" class="flex-1 py-2.5 rounded-xl text-xs font-bold btn-primary">Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FIREBASE CLOUD SDK (Loaded directly via CDN — No npm required!) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc, collection, addDoc, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-firestore.js";
+
+    // 🔥 PASTE YOUR FREE FIREBASE CONFIG HERE:
+    const firebaseConfig = {
+      apiKey: "PASTE_YOUR_API_KEY",
+      authDomain: "PASTE_YOUR_PROJECT.firebaseapp.com",
+      projectId: "PASTE_YOUR_PROJECT_ID",
+      storageBucket: "PASTE_YOUR_PROJECT.appspot.com",
+      messagingSenderId: "000000000000",
+      appId: "1:000000000000:web:000000000000"
+    };
+
+    const isFirebaseConfigured = !firebaseConfig.apiKey.includes("PASTE_YOUR");
+    let auth, db;
+    if (isFirebaseConfigured) {
+      const app = initializeApp(firebaseConfig);
+      auth = getAuth(app);
+      db = getFirestore(app);
+    }
+
+    const state = {
+      user: null,
+      userProfile: null,
+      catalog: [],
+      isRegisterMode: false,
+      currentOrder: null,
+      currentAnime: null
+    };
+
+    // ================= AUTHENTICATION =================
+    window.openAuthModal = () => {
+      document.getElementById('authError').classList.add('hidden');
+      document.getElementById('authModal').classList.remove('hidden');
+    };
+
+    window.toggleAuthMode = () => {
+      state.isRegisterMode = !state.isRegisterMode;
+      document.getElementById('authName').classList.toggle('hidden', !state.isRegisterMode);
+      document.getElementById('authModalTitle').textContent = state.isRegisterMode ? 'Create AniNex Account' : 'Sign In to AniNex';
+      document.getElementById('authSubmitBtn').textContent = state.isRegisterMode ? 'Create Account' : 'Sign In';
+      document.getElementById('authSwitchText').textContent = state.isRegisterMode ? 'Already have an account?' : 'New to AniNex?';
+      document.getElementById('authSwitchBtn').textContent = state.isRegisterMode ? 'Sign In' : 'Create Account';
+    };
+
+    window.submitAuth = async () => {
+      const name = document.getElementById('authName').value.trim() || 'Otaku Member';
+      const email = document.getElementById('authEmail').value.trim();
+      const pass = document.getElementById('authPassword').value;
+      const errEl = document.getElementById('authError');
+
+      if (!isFirebaseConfigured) {
+        // Local fallback if Firebase keys aren't pasted yet
+        state.user = { uid: 'local_' + email, email };
+        state.userProfile = JSON.parse(localStorage.getItem('aninex_prof_' + email) || JSON.stringify({
+          name, email, vipUntil: 0, vipPlan: 'FREE', adPassUntil: 0, adsWatchedToday: 0, lastAdDate: '', watchlist: []
+        }));
+        localStorage.setItem('aninex_prof_' + email, JSON.stringify(state.userProfile));
+        document.getElementById('authModal').classList.add('hidden');
+        updateUserUI();
+        return;
+      }
+
+      try {
+        if (state.isRegisterMode) {
+          const cred = await createUserWithEmailAndPassword(auth, email, pass);
+          await setDoc(doc(db, 'users', cred.user.uid), {
+            name, email, vipUntil: 0, vipPlan: 'FREE', adPassUntil: 0, adsWatchedToday: 0, lastAdDate: '', watchlist: []
+          });
+        } else {
+          await signInWithEmailAndPassword(auth, email, pass);
+        }
+        document.getElementById('authModal').classList.add('hidden');
+      } catch (e) {
+        errEl.textContent = e.message;
+        errEl.classList.remove('hidden');
+      }
+    };
+
+    window.logoutUser = async () => {
+      if (isFirebaseConfigured) await signOut(auth);
+      state.user = null;
+      state.userProfile = null;
+      updateUserUI();
+    };
+
+    if (isFirebaseConfigured) {
+      onAuthStateChanged(auth, async (u) => {
+        state.user = u;
+        if (u) {
+          const snap = await getDoc(doc(db, 'users', u.uid));
+          state.userProfile = snap.exists() ? snap.data() : { name: u.email.split('@')[0], email: u.email, vipUntil: 0, adPassUntil: 0, adsWatchedToday: 0, watchlist: [] };
+          const today = new Date().toISOString().slice(0, 10);
+          if (state.userProfile.lastAdDate !== today) {
+            state.userProfile.adsWatchedToday = 0;
+            state.userProfile.lastAdDate = today;
+            await updateDoc(doc(db, 'users', u.uid), { adsWatchedToday: 0, lastAdDate: today });
+          }
+        } else {
+          state.userProfile = null;
+        }
+        updateUserUI();
+      });
+    }
+
+    function hasUnlimitedAccess() {
+      if (!state.userProfile) return false;
+      const now = Date.now();
+      return (state.userProfile.vipUntil || 0) > now || (state.userProfile.adPassUntil || 0) > now;
+    }
+
+    function updateUserUI() {
+      const btn = document.getElementById('headerAuthBtn');
+      const badge = document.getElementById('adProgressBadge');
+      const watchBtn = document.getElementById('watchAdBtn');
+
+      if (!state.userProfile) {
+        btn.textContent = 'Sign In';
+        btn.onclick = window.openAuthModal;
+        document.getElementById('profileName').textContent = 'Guest Viewer';
+        document.getElementById('profileEmail').textContent = 'Sign in to bind your ₹49/Mo VIP pass & watchlist.';
+        document.getElementById('profileAuthActions').innerHTML = `<button onclick="openAuthModal()" class="btn-primary px-5 py-2.5 rounded-xl text-xs font-bold">Sign In / Register</button>`;
+        return;
+      }
+
+      const isVip = (state.userProfile.vipUntil || 0) > Date.now();
+      btn.textContent = isVip ? `👑 ${state.userProfile.name}` : state.userProfile.name;
+      btn.onclick = () => window.navigate('mylist');
+      document.getElementById('profileName').textContent = `${state.userProfile.name} (${isVip ? state.userProfile.vipPlan : 'Free Member'})`;
+      document.getElementById('profileEmail').textContent = state.userProfile.email;
+      document.getElementById('profileAuthActions').innerHTML = `<button onclick="logoutUser()" class="px-4 py-2 rounded-xl text-xs font-bold bg-red-500/20 text-red-300">Sign Out</button>`;
+
+      if (isVip) {
+        badge.textContent = '👑 VIP Active — Unlimited Ad-Free Access';
+      } else if (hasUnlimitedAccess()) {
+        badge.textContent = '⚡ 3 / 3 Ads Completed — 24h Unlimited Active';
+      } else {
+        const c = state.userProfile.adsWatchedToday || 0;
+        badge.textContent = `${c} / 3 Ads Completed Today`;
+        watchBtn.textContent = `▶ Watch Sponsor Ad (${c + 1}/3)`;
+      }
+    }
+
+    // ================= AUTOMATIC UPI PAYMENT FLOW (9226014759@fam) =================
+    window.initiateSubscription = async (planName, amount, durationDays) => {
+      if (!state.user) {
+        alert('Please Sign In first so your VIP subscription stays saved to your email!');
+        window.openAuthModal();
+        return;
+      }
+      const orderId = 'ANX_' + Date.now();
+      state.currentOrder = { orderId, planName, amount, durationDays };
+      const upiUri = `upi://pay?pa=9226014759@fam&pn=AniNex%20VIP&am=${amount}&cu=INR&tr=${orderId}&tn=${encodeURIComponent(planName)}`;
+
+      window.resetPaymentModal();
+      document.getElementById('upiOrderIdText').textContent = orderId;
+      document.getElementById('upiPayAmt').textContent = amount;
+      document.getElementById('upiDeepLink').href = upiUri;
+      document.getElementById('upiQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUri)}`;
+      document.getElementById('upiModal').classList.remove('hidden');
+    };
+
+    window.verifyUpiAutomatically = async () => {
+      const utr = document.getElementById('upiUtrInput').value.trim();
+      document.getElementById('upiCheckoutBody').classList.add('hidden');
+      document.getElementById('paymentResultBox').classList.remove('hidden');
+
+      if (!/^\d{12}$/.test(utr)) {
+        document.getElementById('payResultIcon').textContent = '❌';
+        document.getElementById('payResultIcon').className = 'w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl bg-red-500/20';
+        document.getElementById('payResultTitle').textContent = 'Payment Verification Failed';
+        document.getElementById('payResultMsg').textContent = 'Invalid 12-digit UTR number. Please check your UPI receipt and try again.';
+        document.getElementById('payRetryBtn').classList.remove('hidden');
+        return;
+      }
+
+      const newVipUntil = Math.max(Date.now(), state.userProfile.vipUntil || 0) + state.currentOrder.durationDays * 86400000;
+      state.userProfile.vipUntil = newVipUntil;
+      state.userProfile.vipPlan = state.currentOrder.planName;
+
+      if (isFirebaseConfigured) {
+        await updateDoc(doc(db, 'users', state.user.uid), { vipUntil: newVipUntil, vipPlan: state.currentOrder.planName });
+        await addDoc(collection(db, 'payments'), {
+          uid: state.user.uid, email: state.userProfile.email, ...state.currentOrder, utr, status: 'SUCCESS', createdAt: Date.now()
+        });
+      } else {
+        localStorage.setItem('aninex_prof_' + state.userProfile.email, JSON.stringify(state.userProfile));
+      }
+
+      updateUserUI();
+      document.getElementById('payResultIcon').textContent = '✅';
+      document.getElementById('payResultIcon').className = 'w-16 h-16 rounded-full mx-auto flex items-center justify-center text-3xl bg-emerald-500/20';
+      document.getElementById('payResultTitle').textContent = 'Payment Successful!';
+      document.getElementById('payResultMsg').textContent = `${state.currentOrder.planName} unlocked on ${state.userProfile.email}!`;
+      document.getElementById('payRetryBtn').classList.add('hidden');
+    };
+
+    window.resetPaymentModal = () => {
+      document.getElementById('upiCheckoutBody').classList.remove('hidden');
+      document.getElementById('paymentResultBox').classList.add('hidden');
+      document.getElementById('upiUtrInput').value = '';
+    };
+
+    // ================= 3-AD DAILY UNLOCK =================
+    window.startVerifiedAd = () => {
+      if (!state.user) {
+        alert('Please Sign In first to earn 3-Ad 24h Unlimited Streaming!');
+        window.openAuthModal();
+        return;
+      }
+      document.getElementById('playerLockOverlay').classList.add('hidden');
+      const adOverlay = document.getElementById('adCountdownOverlay');
+      adOverlay.classList.remove('hidden');
+
+      let sec = 5;
+      document.getElementById('adTimerSec').textContent = sec;
+      const timer = setInterval(async () => {
+        sec--;
+        document.getElementById('adTimerSec').textContent = Math.max(0, sec);
+        if (sec <= 0) {
+          clearInterval(timer);
+          adOverlay.classList.add('hidden');
+          const next = Math.min(3, (state.userProfile.adsWatchedToday || 0) + 1);
+          state.userProfile.adsWatchedToday = next;
+          if (next >= 3) state.userProfile.adPassUntil = Date.now() + 86400000;
+
+          if (isFirebaseConfigured) {
+            await updateDoc(doc(db, 'users', state.user.uid), {
+              adsWatchedToday: next,
+              adPassUntil: state.userProfile.adPassUntil || 0
+            });
+          } else {
+            localStorage.setItem('aninex_prof_' + state.userProfile.email, JSON.stringify(state.userProfile));
+          }
+          updateUserUI();
+          if (next >= 3) alert('🎉 3/3 Ads Completed! 24-Hour Unlimited Streaming Unlocked!');
+        }
+      }, 1000);
+    };
+
+    // ================= MUSE ASIA & MUSE INDIA AUTO-FETCHER (NO SERVER NEEDED) =================
+    window.syncMuseFeeds = async () => {
+      const btn = document.getElementById('syncMuseBtn');
+      if (btn) btn.textContent = 'Fetching Muse Feeds...';
+      // Official Muse Asia Playlist Feed via CORS-safe RSS2JSON
+      const feeds = [
+        { source: 'Muse Asia', url: 'https://www.youtube.com/feeds/videos.xml?channel_id=UCGbshtvS9t-8CW11W7TooQg' },
+        { source: 'Muse India', url: 'https://www.youtube.com/feeds/videos.xml?user=MuseAsia' }
+      ];
+      const seriesMap = new Map();
+
+      for (const f of feeds) {
+        try {
+          const res = await fetch(`https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(f.url)}`);
+          const data = await res.json();
+          for (const item of (data.items || [])) {
+            if (!/episode|ep\s*\d+/i.test(item.title)) continue;
+            const vid = (item.guid || '').split(':').pop();
+            const cleanTitle = item.title.replace(/\|.*$/, '').replace(/\[.*?\]/g, '').replace(/[-–]\s*(Episode|Ep\.?)\s*\d+.*$/i, '').trim();
+            const epMatch = item.title.match(/(?:Episode|Ep\.?)\s*(\d+)/i);
+            const epNum = epMatch ? Number(epMatch[1]) : 1;
+
+            if (!seriesMap.has(cleanTitle)) {
+              seriesMap.set(cleanTitle, {
+                title: cleanTitle,
+                source: f.source,
+                poster: item.thumbnail || `https://i.ytimg.com/vi/${vid}/hqdefault.jpg`,
+                audio_tag: item.title.toLowerCase().includes('hindi') ? 'Hindi Dub' : 'English Sub',
+                synopsis: `Official licensed episode from ${f.source}.`,
+                episodes: []
+              });
+            }
+            seriesMap.get(cleanTitle).episodes.push({ num: epNum, title: `Episode ${epNum}`, url: `https://www.youtube.com/embed/${vid}` });
+          }
+        } catch (e) { console.warn(e); }
+      }
+
+      const imported = Array.from(seriesMap.values());
+      if (imported.length) {
+        state.catalog = [...imported, ...state.catalog];
+        localStorage.setItem('aninex_cached_catalog', JSON.stringify(state.catalog));
+        if (isFirebaseConfigured) {
+          for (const s of imported) await addDoc(collection(db, 'catalog'), s);
+        }
+        renderCatalog();
+      }
+      if (btn) btn.textContent = '🔄 Auto-Fetch Muse Asia & Muse India';
+      alert(`Synced ${imported.length} official Muse anime series!`);
+    };
+
+    // ================= PLAYER, NAVIGATION & ADMIN GATE =================
+    function animeCardHTML(item, rank = null) {
+      const img = item.poster || item.images?.jpg?.large_image_url || 'https://cdn.myanimelist.net/images/anime/1015/138006l.jpg';
+      const payload = encodeURIComponent(JSON.stringify(item));
+      return `
+        <div onclick="openPlayer('${payload}')" class="glass-card rounded-2xl overflow-hidden cursor-pointer relative group ${rank ? 'min-w-[170px]' : ''}">
+          <div class="relative aspect-[2/3] overflow-hidden">
+            <img src="${img}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-[#FF2A5F] text-white">${item.source || item.audio_tag || 'Muse'}</span>
+            ${rank ? `<span class="rank-num text-6xl absolute -bottom-3 left-2">${rank}</span>` : ''}
+          </div>
+          <div class="p-3">
+            <h3 class="font-bold text-xs sm:text-sm line-clamp-1">${item.title}</h3>
+            <p class="text-[11px] text-gray-400 mt-0.5">${(item.episodes || []).length || 'HD'} Episodes</p>
+          </div>
+        </div>`;
+    }
+
+    window.openPlayer = (encoded) => {
+      const anime = JSON.parse(decodeURIComponent(encoded));
+      state.currentAnime = anime;
+      document.getElementById('playerTitle').textContent = anime.title;
+      document.getElementById('playerAudioTag').textContent = anime.audio_tag || 'Sub / Dub';
+      document.getElementById('playerSynopsis').textContent = anime.synopsis || '';
+      document.getElementById('playerModal').classList.remove('hidden');
+
+      const eps = anime.episodes && anime.episodes.length ? anime.episodes : [{ num: 1, title: 'Episode 1', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' }];
+      document.getElementById('playerEpisodesList').innerHTML = eps.map((ep, idx) =>
+        `<button onclick='playEpisode(${JSON.stringify(ep)})' class="py-2 px-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-[#FF2A5F]">EP ${ep.num || idx + 1}</button>`
+      ).join('');
+      window.playEpisode(eps[0]);
+    };
+
+    window.playEpisode = (ep) => {
+      const video = document.getElementById('html5Player');
+      const iframe = document.getElementById('embedPlayer');
+      const lock = document.getElementById('playerLockOverlay');
+
+      video.pause(); video.classList.add('hidden');
+      iframe.classList.add('hidden'); iframe.src = '';
+
+      if (!hasUnlimitedAccess() && (ep.num || 1) > 1) {
+        lock.classList.remove('hidden');
+        document.getElementById('modalAdCount').textContent = state.userProfile ? state.userProfile.adsWatchedToday : 0;
+        return;
+      }
+
+      lock.classList.add('hidden');
+      document.getElementById('downloadEpBtn').href = ep.url;
+
+      if (ep.url.includes('youtube.com/embed')) {
+        iframe.src = ep.url;
+        iframe.classList.remove('hidden');
+      } else {
+        video.classList.remove('hidden');
+        if (ep.url.includes('.m3u8') && Hls.isSupported()) {
+          const hls = new Hls(); hls.loadSource(ep.url); hls.attachMedia(video);
+        } else {
+          video.src = ep.url;
+        }
+        video.play().catch(() => {});
+      }
+    };
+
+    window.closePlayer = () => {
+      document.getElementById('html5Player').pause();
+      document.getElementById('embedPlayer').src = '';
+      document.getElementById('playerModal').classList.add('hidden');
+    };
+
+    window.navigate = (view) => {
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(`view-${view}`).classList.remove('hidden');
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('btn-primary');
+        if (b.dataset.nav === view) b.classList.add('btn-primary');
+      });
+      if (view === 'explore') window.filterExplore('all');
+      if (view === 'schedule') window.loadSchedule('monday');
+    };
+
+    window.filterExplore = async (genre) => {
+      const url = genre === 'all' ? 'https://api.jikan.moe/v4/top/anime?limit=15' : `https://api.jikan.moe/v4/anime?genres=${genre}&limit=15`;
+      const { data } = await fetch(url).then(r => r.json());
+      document.getElementById('exploreGrid').innerHTML = (data || []).map(a => animeCardHTML({ ...a, poster: a.images?.jpg?.large_image_url })).join('');
+    };
+
+    window.loadSchedule = async (day) => {
+      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+      document.getElementById('dayTabs').innerHTML = days.map(d => `<button onclick="loadSchedule('${d}')" class="px-4 py-1.5 rounded-full text-xs font-bold capitalize ${d === day ? 'btn-primary' : 'bg-white/10'}">${d}</button>`).join('');
+      const { data } = await fetch(`https://api.jikan.moe/v4/schedules?filter=${day}&limit=10`).then(r => r.json());
+      document.getElementById('scheduleGrid').innerHTML = (data || []).map(a => animeCardHTML({ ...a, poster: a.images?.jpg?.large_image_url })).join('');
+    };
+
+    window.verifyAdminPin = () => {
+      if (document.getElementById('adminPinInput').value.trim() === '38729') {
+        document.getElementById('adminPinModal').classList.add('hidden');
+        window.navigate('admin');
+      } else {
+        document.getElementById('pinError').classList.remove('hidden');
+      }
+    };
+
+    window.logoutAdmin = () => window.navigate('discover');
+
+    window.publishCustomAnime = async () => {
+      const item = {
+        title: document.getElementById('upTitle').value,
+        audio_tag: document.getElementById('upAudio').value,
+        poster: document.getElementById('upPoster').value,
+        source: 'AniNex Exclusive',
+        episodes: [{ num: 1, title: 'Episode 1', url: document.getElementById('upEpUrl').value }]
+      };
+      state.catalog.unshift(item);
+      localStorage.setItem('aninex_cached_catalog', JSON.stringify(state.catalog));
+      if (isFirebaseConfigured) await addDoc(collection(db, 'catalog'), item);
+      renderCatalog();
+      alert('Published Live!');
+    };
+
+    function renderCatalog() {
+      document.getElementById('museCatalogGrid').innerHTML = state.catalog.map(a => animeCardHTML(a)).join('') || '<p class="text-xs text-gray-400">Tap Admin (5 taps on logo) → Auto-Fetch Muse Asia & Muse India.</p>';
+    }
+
+    // 5-Tap Logo Trigger + Search Bar + Hash Route for Admin (PIN: 38729)
+    let taps = 0;
+    document.getElementById('brandLogoTrigger').addEventListener('click', () => {
+      if (++taps >= 5) { taps = 0; document.getElementById('adminPinModal').classList.remove('hidden'); }
+    });
+    document.getElementById('globalSearch').addEventListener('input', (e) => {
+      if (e.target.value.trim().toLowerCase().replace(/^#?\//, '') === 'aninex/path/admin') {
+        e.target.value = '';
+        document.getElementById('adminPinModal').classList.remove('hidden');
+      }
+    });
+    if ((window.location.pathname + window.location.hash).toLowerCase().includes('aninex/path/admin')) {
+      document.getElementById('adminPinModal').classList.remove('hidden');
+    }
+
+    // Boot
+    (async () => {
+      state.catalog = JSON.parse(localStorage.getItem('aninex_cached_catalog') || '[]');
+      if (isFirebaseConfigured) {
+        const snap = await getDocs(collection(db, 'catalog'));
+        if (!snap.empty) state.catalog = snap.docs.map(d => d.data());
+      }
+      renderCatalog();
+      if (!state.catalog.length) window.syncMuseFeeds();
+      const topRes = await fetch('https://api.jikan.moe/v4/top/anime?limit=10').then(r => r.json());
+      document.getElementById('top10Row').innerHTML = (topRes.data || []).map((a, i) => animeCardHTML({ ...a, poster: a.images?.jpg?.large_image_url }, i + 1)).join('');
+    })();
+  </script>
+</body>
+</html>

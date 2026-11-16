@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script>
+    const path = window.location.pathname;
+    const segs = path.split('/').filter(Boolean);
+    const base = segs.length > 0 ? '/' + segs[0] + '/' : '/';
+    window.location.replace(base + '#' + path);
+  </script>
+</head>
+<body></body>
+</html>
