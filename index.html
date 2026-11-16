@@ -2,460 +2,337 @@
 <html lang="en" class="dark">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>AniNex — Spatial Anime Streaming</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AniNex — Next-Gen Spatial Anime Streaming</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-  <script src="https://unpkg.com/@phosphor-icons/web"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
       --primary: #FF2A5F;
       --accent: #00F0FF;
       --bg: #06060C;
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       background-color: var(--bg);
-      color: #F8FAFC;
+      color: #F4F4F8;
       font-family: 'Plus Jakarta Sans', sans-serif;
       overflow-x: hidden;
-      min-height: 100vh;
     }
-    h1, h2, h3, h4, .font-display { font-family: 'Outfit', sans-serif; }
-    .font-mono { font-family: 'JetBrains Mono', monospace; }
+    h1, h2, h3, .font-display { font-family: 'Outfit', sans-serif; }
     .glass {
-      background: rgba(14, 15, 26, 0.78);
+      background: rgba(15, 16, 28, 0.8);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.09);
+      border: 1px solid rgba(255, 255, 255, 0.08);
     }
     .glass-card {
-      background: linear-gradient(155deg, rgba(22, 24, 42, 0.85), rgba(10, 11, 20, 0.94));
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+      background: linear-gradient(145deg, rgba(22, 24, 40, 0.85), rgba(11, 12, 22, 0.95));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
     }
     .glass-card:hover {
       transform: translateY(-4px);
       border-color: var(--primary);
-      box-shadow: 0 14px 30px -10px rgba(255, 42, 95, 0.35);
+      box-shadow: 0 12px 30px -10px rgba(255, 42, 95, 0.35);
     }
     .btn-primary {
-      background: linear-gradient(135deg, var(--primary), #FF5E3A);
-      box-shadow: 0 8px 24px -6px rgba(255, 42, 95, 0.55);
-      color: #FFFFFF;
-    }
-    .btn-cyber {
-      background: linear-gradient(135deg, var(--accent), #0095FF);
-      box-shadow: 0 8px 24px -6px rgba(0, 240, 255, 0.45);
-      color: #05070E;
+      background: linear-gradient(135deg, var(--primary), #ff5e3a);
+      box-shadow: 0 8px 24px -6px rgba(255, 42, 95, 0.5);
     }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     .rank-num {
-      -webkit-text-stroke: 2px rgba(255, 255, 255, 0.28);
+      -webkit-text-stroke: 2px rgba(255,255,255,0.22);
       color: transparent;
       font-family: 'Outfit', sans-serif;
       font-weight: 800;
-      line-height: 0.85;
     }
-    .glass-card:hover .rank-num {
-      -webkit-text-stroke: 2px var(--accent);
-    }
-    @keyframes pulseGlow {
-      0%, 100% { opacity: 0.22; }
-      50% { opacity: 0.34; }
-    }
-    .ambient-orb { animation: pulseGlow 7s infinite ease-in-out; }
   </style>
 </head>
-<body class="pb-28 selection:bg-[#FF2A5F]/30 selection:text-white">
+<body class="pb-24">
 
-  <!-- Ambient Neon Backdrop -->
+  <!-- Ambient Neon Orbs -->
   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-    <div id="orbPrimary" class="ambient-orb absolute -top-36 -left-32 w-[460px] h-[460px] rounded-full blur-[140px]" style="background: var(--primary);"></div>
-    <div id="orbAccent" class="ambient-orb absolute top-1/3 -right-36 w-[440px] h-[440px] rounded-full blur-[150px]" style="background: var(--accent);"></div>
+    <div id="orb1" class="absolute -top-32 -left-32 w-96 h-96 rounded-full blur-[130px] opacity-25" style="background: var(--primary);"></div>
+    <div id="orb2" class="absolute top-1/3 -right-32 w-96 h-96 rounded-full blur-[140px] opacity-20" style="background: var(--accent);"></div>
   </div>
 
-  <!-- Live Top Announcement Marquee -->
-  <div id="announcementBar" class="relative z-30 text-center text-xs font-semibold py-2 px-4 bg-gradient-to-r from-[#FF2A5F]/25 via-[#00F0FF]/15 to-[#FF2A5F]/25 border-b border-white/10 truncate">
-    🔥 Watch 3 Ads for 24h Unlimited Streaming or Activate ₹49/Month VIP via UPI (9226014759@fam)!
+  <!-- Top Live Announcement Strip -->
+  <div id="announcementBar" class="relative z-30 text-center text-xs font-medium py-2 px-4 bg-gradient-to-r from-[#FF2A5F]/20 via-[#00F0FF]/15 to-[#FF2A5F]/20 border-b border-white/10">
+    🔥 Watch 3 Ads for 24h Unlimited Streaming or Go VIP at ₹49/Month via UPI (9226014759@fam)!
   </div>
 
-  <!-- Sticky Top Spatial Header -->
+  <!-- Header -->
   <header class="sticky top-0 z-30 glass border-b border-white/10 px-4 md:px-8 py-3">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
-      <!-- Brand Logo -->
-      <button type="button" onclick="navigate('discover')" class="flex items-center gap-2.5 text-left shrink-0">
-        <div class="w-10 h-10 rounded-2xl btn-primary flex items-center justify-center font-display font-extrabold text-xl">A</div>
+      <div id="brandLogoTrigger" class="flex items-center gap-3 cursor-pointer select-none">
+        <div class="w-10 h-10 rounded-xl btn-primary flex items-center justify-center font-display font-extrabold text-xl text-white">A</div>
         <div>
-          <span class="font-display font-extrabold text-xl tracking-tight block leading-none">Ani<span style="color: var(--accent)">Nex</span></span>
-          <span class="text-[10px] font-mono text-slate-400 tracking-wider">SPATIAL ENGINE</span>
+          <span class="font-display font-extrabold text-xl tracking-tight">Ani<span style="color: var(--accent)">Nex</span></span>
+          <span class="block text-[10px] text-gray-400 -mt-1">SPATIAL ANIME HUB</span>
         </div>
-      </button>
-
-      <!-- Live Global Search -->
-      <div class="flex-1 max-w-md relative">
-        <i class="ph ph-magnifying-glass text-slate-400 text-base absolute left-3.5 top-1/2 -translate-y-1/2"></i>
-        <input id="globalSearch" type="text" placeholder="Search anime, Hindi dubs, movies..."
-          class="w-full bg-white/[0.06] hover:bg-white/[0.09] focus:bg-white/[0.11] border border-white/10 rounded-2xl pl-10 pr-8 py-2 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-[#00F0FF] transition" />
-        <button id="clearSearchBtn" type="button" onclick="clearSearchInput()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white">
-          <i class="ph-bold ph-x text-xs"></i>
-        </button>
       </div>
 
-      <!-- User Pass / VIP Status Pill -->
-      <button type="button" onclick="navigate('vip')" id="passStatusPill"
-        class="px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 border border-white/15 bg-white/[0.06] hover:bg-white/[0.12] transition shrink-0">
-        <span id="passDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+      <!-- Live Search & Hidden Admin Command Input -->
+      <div class="flex-1 max-w-md relative">
+        <span class="text-gray-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2">🔍</span>
+        <input id="globalSearch" type="text" placeholder="Search anime, Hindi dubs..."
+          class="w-full bg-white/5 border border-white/10 rounded-full pl-9 pr-4 py-2 text-sm focus:outline-none focus:border-[#00F0FF] transition" />
+      </div>
+
+      <!-- Pass Status Pill -->
+      <button onclick="navigate('vip')"
+        class="px-3.5 py-2 rounded-full text-xs font-semibold flex items-center gap-2 border border-white/15 bg-white/5 hover:bg-white/10 transition shrink-0">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
         <span id="passPillText">Free (0/3 Ads)</span>
       </button>
     </div>
   </header>
 
-  <!-- MAIN APPLICATION VIEWPORT -->
+  <!-- MAIN VIEWPORT -->
   <main class="relative z-10 max-w-7xl mx-auto px-4 md:px-8 pt-6">
 
-    <!-- ========================================================= -->
-    <!-- VIEW 1: DISCOVER (HERO + UPLOADS + TOP 10 + SEASONAL)     -->
-    <!-- ========================================================= -->
+    <!-- ================= 1. DISCOVER VIEW ================= -->
     <section id="view-discover" class="space-y-10">
-      <!-- Hero Spotlight Banner -->
-      <div class="relative rounded-3xl overflow-hidden glass-card min-h-[340px] md:min-h-[420px] flex items-end p-6 md:p-10">
-        <img id="heroImg" src="https://cdn.myanimelist.net/images/anime/1015/138006l.jpg" alt="Spotlight" class="absolute inset-0 w-full h-full object-cover opacity-45 transition-all duration-700" />
+      <!-- Hero Spotlight -->
+      <div class="relative rounded-3xl overflow-hidden glass-card min-h-[340px] md:min-h-[410px] flex items-end p-6 md:p-10">
+        <img id="heroImg" src="https://cdn.myanimelist.net/images/anime/1015/138006l.jpg" class="absolute inset-0 w-full h-full object-cover opacity-45" />
         <div class="absolute inset-0 bg-gradient-to-t from-[#06060C] via-[#06060C]/65 to-transparent"></div>
-        <div class="absolute inset-0 bg-gradient-to-r from-[#06060C] via-[#06060C]/40 to-transparent"></div>
-
         <div class="relative z-10 max-w-2xl space-y-4">
           <div class="flex flex-wrap items-center gap-2">
-            <span class="px-3 py-1 rounded-full text-[11px] font-extrabold btn-primary uppercase tracking-wider">⚡ Spatial Spotlight</span>
-            <span id="heroAudio" class="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur border border-white/10">Hindi Dub + Multi-Audio</span>
-            <span id="heroScore" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-400/20">★ 9.14</span>
+            <span class="px-3 py-1 rounded-full text-xs font-bold bg-[#FF2A5F] text-white">FEATURED SPOTLIGHT</span>
+            <span id="heroAudio" class="px-3 py-1 rounded-full text-xs font-semibold bg-white/10 backdrop-blur">Hindi Dub + Multi-Audio</span>
+            <span id="heroScore" class="px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/20 text-amber-300">★ 9.1</span>
           </div>
           <h1 id="heroTitle" class="text-3xl md:text-5xl font-extrabold leading-tight">Frieren: Beyond Journey's End</h1>
-          <p id="heroDesc" class="text-xs sm:text-sm text-slate-300 line-clamp-2 leading-relaxed">
-            After a ten-year quest alongside the hero Himmel and his party, the elven mage Frieren embarks on a new journey to understand human hearts.
-          </p>
-          <div class="flex flex-wrap gap-3 pt-1">
-            <button type="button" id="heroWatchBtn" class="btn-primary px-6 py-3 rounded-2xl font-bold text-sm flex items-center gap-2 active:scale-95 transition">
-              <i class="ph-fill ph-play text-base"></i> Stream Now
+          <p id="heroDesc" class="text-sm text-gray-300 line-clamp-2">An elf mage embarks on a quiet journey across decades to understand the human hearts she once traveled alongside.</p>
+          <div class="flex flex-wrap gap-3 pt-2">
+            <button onclick="playFeaturedHero()" class="btn-primary px-6 py-3 rounded-xl font-bold text-sm flex items-center gap-2">
+              ▶ Stream Now
             </button>
-            <button type="button" onclick="navigate('vip')" class="px-5 py-3 rounded-2xl font-bold text-sm bg-white/10 hover:bg-white/15 border border-white/15 flex items-center gap-2 transition">
-              <i class="ph-fill ph-crown text-amber-400"></i> ₹49/mo VIP or 3 Ads
+            <button onclick="navigate('vip')" class="px-5 py-3 rounded-xl font-semibold text-sm bg-white/10 hover:bg-white/15 border border-white/10">
+              ₹49/Mo VIP or 3 Ads
             </button>
           </div>
         </div>
       </div>
 
-      <!-- AniNex Exclusives / Admin Uploaded Shelf -->
+      <!-- AniNex Uploaded Exclusives Shelf -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl md:text-2xl font-bold flex items-center gap-2.5">
+          <h2 class="text-xl md:text-2xl font-bold flex items-center gap-2">
             <span class="w-2 h-6 rounded-full" style="background: var(--primary)"></span>
-            AniNex Exclusives & Hindi Dub Vault
+            AniNex Uploaded & Hindi Dub Exclusives
           </h2>
-          <span id="exclusivesCount" class="text-xs font-mono text-slate-400">LIVE SYNCED</span>
+          <span class="text-xs text-gray-400">Custom Uploads</span>
         </div>
         <div id="exclusivesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
       </div>
 
-      <!-- Top 10 Trending Kinetic Shelf -->
+      <!-- Top 10 Trending Shelf -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl md:text-2xl font-bold flex items-center gap-2.5">
+          <h2 class="text-xl md:text-2xl font-bold flex items-center gap-2">
             <span class="w-2 h-6 rounded-full" style="background: var(--accent)"></span>
             Top 10 Trending Today
           </h2>
-          <span class="text-xs font-mono text-emerald-400 flex items-center gap-1.5">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span> JIKAN v4 LIVE
-          </span>
+          <span class="text-xs text-gray-400">Live Feed</span>
         </div>
-        <div id="top10Row" class="flex gap-4 overflow-x-auto no-scrollbar pb-3"></div>
+        <div id="top10Row" class="flex gap-5 overflow-x-auto no-scrollbar pb-4"></div>
       </div>
 
-      <!-- 2026 Seasonal Simulcasts -->
+      <!-- Seasonal Simulcasts -->
       <div class="space-y-4">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl md:text-2xl font-bold flex items-center gap-2.5">
-            <span class="w-2 h-6 rounded-full bg-purple-500"></span>
-            Live Seasonal Simulcasts
-          </h2>
-          <button type="button" onclick="navigate('explore')" class="text-xs font-bold text-[#00F0FF] hover:underline">Explore All →</button>
+          <h2 class="text-xl md:text-2xl font-bold">2026 Seasonal Simulcasts</h2>
+          <button onclick="navigate('explore')" class="text-xs font-semibold text-[#00F0FF] hover:underline">Explore All →</button>
         </div>
         <div id="seasonalGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
       </div>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- VIEW 2: EXPLORE (GENRE FILTERS + AUDIO FILTER + LIVE API) -->
-    <!-- ========================================================= -->
+    <!-- ================= 2. EXPLORE VIEW ================= -->
     <section id="view-explore" class="hidden space-y-6">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold">Explore Anime Universe</h1>
-          <p class="text-xs text-slate-400 mt-0.5">Filter by genre or audio track across live MyAnimeList & AniNex Exclusives</p>
-        </div>
-        <div class="flex flex-wrap gap-2" id="genrePills">
-          <button type="button" onclick="filterExplore('all', this)" class="genre-btn px-4 py-2 rounded-2xl text-xs font-bold btn-primary">All Popular</button>
-          <button type="button" onclick="filterExplore(1, this)" class="genre-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white/10 hover:bg-white/15">Action</button>
-          <button type="button" onclick="filterExplore(10, this)" class="genre-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white/10 hover:bg-white/15">Fantasy</button>
-          <button type="button" onclick="filterExplore(22, this)" class="genre-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white/10 hover:bg-white/15">Romance</button>
-          <button type="button" onclick="filterExplore(24, this)" class="genre-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white/10 hover:bg-white/15">Sci-Fi</button>
-          <button type="button" onclick="filterExplore(7, this)" class="genre-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white/10 hover:bg-white/15">Mystery</button>
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <h1 class="text-2xl md:text-3xl font-extrabold">Explore Anime Universe</h1>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="filterExplore('all')" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-[#FF2A5F] text-white">All</button>
+          <button onclick="filterExplore(1)" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20">Action</button>
+          <button onclick="filterExplore(10)" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20">Fantasy</button>
+          <button onclick="filterExplore(22)" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20">Romance</button>
+          <button onclick="filterExplore(24)" class="px-4 py-1.5 rounded-full text-xs font-semibold bg-white/10 hover:bg-white/20">Sci-Fi</button>
         </div>
       </div>
-      <div id="exploreStatus" class="text-xs font-mono text-slate-400">Showing top anime...</div>
       <div id="exploreGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- VIEW 3: WEEKLY SIMULCAST SCHEDULE (MONDAY - SUNDAY)       -->
-    <!-- ========================================================= -->
+    <!-- ================= 3. SCHEDULE VIEW ================= -->
     <section id="view-schedule" class="hidden space-y-6">
-      <div>
-        <h1 class="text-2xl md:text-3xl font-extrabold">Weekly Simulcast Release Schedule</h1>
-        <p class="text-xs text-slate-400 mt-0.5">Live airing calendar synced with Japan & IST simulcast timings</p>
-      </div>
+      <h1 class="text-2xl md:text-3xl font-extrabold">Weekly Simulcast Schedule</h1>
       <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="dayTabs"></div>
       <div id="scheduleGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- VIEW 4: MY LIST (WATCHLIST + WATCH HISTORY + PASS CARD)   -->
-    <!-- ========================================================= -->
-    <section id="view-mylist" class="hidden space-y-8">
-      <div class="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold">My Spatial Library</h1>
-          <p class="text-xs text-slate-400 mt-0.5">Your saved watchlist, continue watching history, and active pass</p>
-        </div>
-        <button type="button" onclick="navigate('vip')" class="px-4 py-2.5 rounded-2xl text-xs font-bold btn-primary">
-          Manage ₹49/mo VIP Pass
-        </button>
-      </div>
-
-      <!-- Active Pass Banner inside My List -->
-      <div id="myListPassSummary" class="glass-card rounded-3xl p-5 flex flex-wrap items-center justify-between gap-4"></div>
-
-      <!-- Saved Watchlist -->
-      <div class="space-y-4">
-        <h2 class="text-lg font-bold flex items-center gap-2">
-          <i class="ph-fill ph-bookmark-simple text-[#FF2A5F]"></i> Saved Watchlist
-        </h2>
-        <div id="watchlistGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
-      </div>
-
-      <!-- Watch History -->
-      <div class="space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold flex items-center gap-2">
-            <i class="ph-fill ph-clock-counter-clockwise text-[#00F0FF]"></i> Recently Watched
-          </h2>
-          <button type="button" onclick="clearWatchHistory()" class="text-xs text-rose-400 hover:underline">Clear History</button>
-        </div>
-        <div id="historyGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
-      </div>
+    <!-- ================= 4. MY LIST VIEW ================= -->
+    <section id="view-mylist" class="hidden space-y-6">
+      <h1 class="text-2xl md:text-3xl font-extrabold">My Saved Watchlist</h1>
+      <div id="watchlistGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4"></div>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- VIEW 5: ANINEX+ (3-AD UNLIMITED PASS & ₹49/MO UPI VIP)    -->
-    <!-- ========================================================= -->
-    <section id="view-vip" class="hidden space-y-8 max-w-5xl mx-auto">
+    <!-- ================= 5. VIP & 3-AD SUBSCRIPTION VIEW ================= -->
+    <section id="view-vip" class="hidden space-y-8 max-w-4xl mx-auto">
       <div class="text-center space-y-2">
-        <span class="px-3.5 py-1 rounded-full text-xs font-extrabold bg-[#00F0FF]/15 text-[#00F0FF] border border-[#00F0FF]/30">
-          UNLIMITED STREAMING & DIRECT DOWNLOADS
-        </span>
-        <h1 class="text-3xl md:text-4xl font-extrabold">AniNex+ Unlimited Access</h1>
-        <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
-          Watch 3 quick sponsor ads to unlock 24 hours of free unlimited streaming, or activate our <strong class="text-white">₹49/Month VIP Pass</strong> via UPI (<code class="text-[#00F0FF]">9226014759@fam</code>).
-        </p>
+        <span class="px-3 py-1 rounded-full text-xs font-bold bg-[#00F0FF]/15 text-[#00F0FF]">UNLIMITED STREAMING & DOWNLOADS</span>
+        <h1 class="text-3xl md:text-4xl font-extrabold">Choose Your Access Mode</h1>
+        <p class="text-sm text-gray-400">Watch 3 short sponsor ads for 24h free access, or go ad-free VIP starting at ₹49/Month.</p>
       </div>
 
-      <!-- OPTION A: 3-AD DAILY UNLIMITED PASS -->
-      <div class="glass-card rounded-3xl p-6 md:p-8 border-[#00F0FF]/35 space-y-5">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
-          <div class="space-y-1.5">
+      <!-- Option A: 3-Ad Daily Unlimited System -->
+      <div class="glass-card rounded-3xl p-6 md:p-8 border-[#00F0FF]/30">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div class="space-y-2">
             <div class="flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-lg text-[11px] font-extrabold bg-emerald-500/20 text-emerald-300">FREE DAILY PASS</span>
-              <span id="adProgressBadge" class="text-xs font-mono font-bold text-[#00F0FF]">0 / 3 Ads Completed Today</span>
+              <span class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-emerald-500/20 text-emerald-300">FREE DAILY PASS</span>
+              <span id="adProgressBadge" class="text-xs font-semibold text-gray-300">0 / 3 Ads Completed Today</span>
             </div>
-            <h2 class="text-2xl font-bold">Watch 3 Ads → 24 Hours Unlimited Streaming</h2>
-            <p class="text-xs text-slate-400">No payment needed. Unlocks all VIP episodes, 1080p streams & episode downloads for 24 hours.</p>
+            <h2 class="text-2xl font-bold">Watch 3 Ads → 24 Hours Unlimited</h2>
+            <p class="text-xs text-gray-400">Unlocks all VIP episodes, 1080p streams, and offline downloads for 24 hours.</p>
           </div>
-          <button type="button" onclick="openSponsorAdModal()" id="watchAdBtn"
-            class="w-full md:w-auto px-6 py-3.5 rounded-2xl font-extrabold text-sm btn-cyber flex items-center justify-center gap-2 active:scale-95 transition shrink-0">
-            <i class="ph-fill ph-play-circle text-lg"></i> Watch Sponsor Ad (1/3)
+          <button onclick="watchSponsorAd()" id="watchAdBtn" class="w-full md:w-auto px-6 py-3.5 rounded-xl font-bold text-sm bg-[#00F0FF] text-black hover:opacity-90 transition">
+            ▶ Watch Sponsor Ad (1/3)
+          </button>
+        </div>
+      </div>
+
+      <!-- Option B: UPI VIP Subscription Plans (9226014759@fam) -->
+      <div class="grid md:grid-cols-3 gap-5">
+        <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6 border-[#FF2A5F] relative">
+          <span class="absolute -top-3 right-5 px-3 py-0.5 rounded-full text-[10px] font-extrabold btn-primary">STARTER PASS</span>
+          <div>
+            <span class="text-xs font-bold text-[#FF2A5F]">MONTHLY VIP</span>
+            <h3 class="text-3xl font-extrabold mt-1">₹49 <span class="text-xs font-normal text-gray-400">/ Month</span></h3>
+            <ul class="mt-4 space-y-2 text-xs text-gray-300">
+              <li>✓ Zero Ads Everywhere</li>
+              <li>✓ Direct MP4 Episode Downloads</li>
+              <li>✓ Hindi Dub + 1080p Priority</li>
+            </ul>
+          </div>
+          <button onclick="openUpiModal('Monthly VIP (₹49/Mo)', 49, 30)" class="w-full py-3 rounded-xl font-bold text-sm btn-primary">
+            Pay ₹49 via UPI
           </button>
         </div>
 
-        <!-- 3 Visual Ad Nodes -->
-        <div class="grid grid-cols-3 gap-3" id="adNodesGrid"></div>
-      </div>
-
-      <!-- OPTION B: ₹49/MONTH VIP SUBSCRIPTION PLANS (UPI: 9226014759@fam) -->
-      <div class="space-y-4">
-        <div class="flex flex-wrap items-center justify-between gap-2">
-          <h2 class="text-xl font-bold">VIP Subscription Passes (Zero Ads Forever)</h2>
-          <span class="text-xs font-mono text-slate-300 bg-white/5 px-3 py-1 rounded-xl border border-white/10">
-            Official UPI ID: <strong class="text-[#00F0FF]">9226014759@fam</strong>
-          </span>
+        <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6">
+          <div>
+            <span class="text-xs font-bold text-gray-400">QUARTERLY PRO</span>
+            <h3 class="text-3xl font-extrabold mt-1">₹129 <span class="text-xs font-normal text-gray-400">/ 3 Months</span></h3>
+            <ul class="mt-4 space-y-2 text-xs text-gray-300">
+              <li>✓ Zero Ads + 4K HDR Upscale</li>
+              <li>✓ Unlimited Offline Downloads</li>
+              <li>✓ Early Simulcast Access</li>
+            </ul>
+          </div>
+          <button onclick="openUpiModal('Quarterly Pro VIP', 129, 90)" class="w-full py-3 rounded-xl font-bold text-sm bg-white/10 hover:bg-white/20 transition">
+            Pay ₹129 via UPI
+          </button>
         </div>
 
-        <div class="grid md:grid-cols-3 gap-5">
-          <!-- Featured ₹49/Month Plan -->
-          <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6 border-2 border-[#FF2A5F] relative shadow-2xl">
-            <span class="absolute -top-3 right-5 px-3 py-0.5 rounded-full text-[10px] font-extrabold btn-primary tracking-wider">BEST VALUE • ₹49/MO</span>
-            <div class="space-y-3">
-              <span class="text-xs font-mono font-bold text-[#FF2A5F]">MONTHLY VIP PASS</span>
-              <div class="flex items-baseline gap-1">
-                <h3 class="text-4xl font-extrabold text-white">₹49</h3>
-                <span class="text-xs text-slate-400">/ month (30 Days)</span>
-              </div>
-              <ul class="pt-2 space-y-2.5 text-xs text-slate-200">
-                <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-emerald-400 text-base"></i> Zero Ads — Instant Unlimited Access</li>
-                <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-emerald-400 text-base"></i> All Hindi Dub & Multi-Audio Episodes</li>
-                <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-emerald-400 text-base"></i> Direct 1080p MP4 Episode Downloads</li>
-                <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-emerald-400 text-base"></i> Instant UPI QR / App Checkout</li>
-              </ul>
-            </div>
-            <button type="button" onclick="openUpiModal('Monthly VIP Pass', 49, 30)" class="w-full py-3.5 rounded-2xl font-extrabold text-sm btn-primary active:scale-95 transition">
-              Subscribe ₹49/Month via UPI
-            </button>
+        <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6">
+          <div>
+            <span class="text-xs font-bold text-[#00F0FF]">ANNUAL LEGEND</span>
+            <h3 class="text-3xl font-extrabold mt-1">₹399 <span class="text-xs font-normal text-gray-400">/ Year</span></h3>
+            <ul class="mt-4 space-y-2 text-xs text-gray-300">
+              <li>✓ Full Year Ad-Free Access</li>
+              <li>✓ Batch Season Downloads</li>
+              <li>✓ VIP Profile Badge</li>
+            </ul>
           </div>
-
-          <!-- Quarterly ₹129 Plan -->
-          <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6">
-            <div class="space-y-3">
-              <span class="text-xs font-mono font-bold text-[#00F0FF]">QUARTERLY PRO</span>
-              <div class="flex items-baseline gap-1">
-                <h3 class="text-4xl font-extrabold text-white">₹129</h3>
-                <span class="text-xs text-slate-400">/ 3 months (90 Days)</span>
-              </div>
-              <ul class="pt-2 space-y-2.5 text-xs text-slate-300">
-                <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-[#00F0FF] text-base"></i> Save ₹18 vs Monthly Plan</li>
-                <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-[#00F0FF] text-base"></i> Zero Ads + 4K HDR Upscaling</li>
-                <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-[#00F0FF] text-base"></i> Unlimited Offline Downloads</li>
-                <li class="flex items-center gap-2"><i class="ph-fill ph-check-circle text-[#00F0FF] text-base"></i> Priority Simulcast Access</li>
-              </ul>
-            </div>
-            <button type="button" onclick="openUpiModal('Quarterly Pro VIP', 129, 90)" class="w-full py-3.5 rounded-2xl font-bold text-sm bg-white/10 hover:bg-white/20 border border-white/15 transition">
-              Pay ₹129 via UPI
-            </button>
-          </div>
-
-          <!-- Annual ₹399 Plan -->
-          <div class="glass-card rounded-3xl p-6 flex flex-col justify-between space-y-6">
-            <div class="space-y-3">
-              <span class="text-xs font-mono font-bold text-amber-300">ANNUAL LEGEND</span>
-              <div class="flex items-baseline gap-1">
-                <h3 class="text-4xl font-extrabold text-white">₹399</h3>
-                <span class="text-xs text-slate-400">/ year (365 Days)</span>
-              </div>
-              <ul class="pt-2 space-y-2.5 text-xs text-slate-300">
-                <li class="flex items-center gap-2"><i class="ph-fill ph-crown text-amber-400 text-base"></i> Full 365 Days Ad-Free VIP</li>
-                <li class="flex items-center gap-2"><i class="ph-fill ph-crown text-amber-400 text-base"></i> Batch Season MP4 Downloads</li>
-                <li class="flex items-center gap-2"><i class="ph-fill ph-crown text-amber-400 text-base"></i> 4 Simultaneous Devices</li>
-                <li class="flex items-center gap-2"><i class="ph-fill ph-crown text-amber-400 text-base"></i> Gold Shinobi Profile Badge</li>
-              </ul>
-            </div>
-            <button type="button" onclick="openUpiModal('Annual Legend VIP', 399, 365)" class="w-full py-3.5 rounded-2xl font-bold text-sm bg-white/10 hover:bg-white/20 border border-white/15 transition">
-              Pay ₹399 via UPI
-            </button>
-          </div>
+          <button onclick="openUpiModal('Annual Legend VIP', 399, 365)" class="w-full py-3 rounded-xl font-bold text-sm bg-white/10 hover:bg-white/20 transition">
+            Pay ₹399 via UPI
+          </button>
         </div>
       </div>
 
       <!-- User's Submitted UPI Payments Status -->
-      <div class="glass-card rounded-3xl p-6 space-y-3">
-        <div class="flex items-center justify-between">
-          <h3 class="font-bold text-sm flex items-center gap-2">
-            <i class="ph-fill ph-receipt text-[#00F0FF]"></i> Your UPI Subscription Verification Status
-          </h3>
-          <button type="button" onclick="renderMyPayments()" class="text-xs font-bold text-[#00F0FF] hover:underline">↻ Refresh</button>
-        </div>
-        <div id="myPaymentsList" class="text-xs text-slate-400">No UPI payments submitted yet.</div>
+      <div class="glass-card rounded-2xl p-5 space-y-3">
+        <h3 class="font-bold text-sm">Your UPI Subscription Verification History</h3>
+        <div id="myPaymentsList" class="text-xs text-gray-400">No UPI payments submitted yet.</div>
       </div>
     </section>
 
-    <!-- ========================================================= -->
-    <!-- VIEW 6: HIDDEN ADMIN STUDIO (/AniNex/path/Admin)          -->
-    <!-- ========================================================= -->
-    <section id="view-admin" class="hidden space-y-6 max-w-5xl mx-auto">
-      <div class="flex flex-wrap items-center justify-between gap-4 glass-card p-6 rounded-3xl border-[#00F0FF]/30">
+    <!-- ================= 6. HIDDEN ADMIN STUDIO (PIN: 38729) ================= -->
+    <section id="view-admin" class="hidden space-y-8 max-w-5xl mx-auto">
+      <div class="flex flex-wrap items-center justify-between gap-4 glass-card p-6 rounded-3xl border-[#00F0FF]/40">
         <div>
-          <span class="text-[11px] font-mono font-bold text-[#00F0FF]">🔐 AUTHENTICATED ADMIN SESSION (PIN: 38729)</span>
+          <span class="text-xs font-bold text-[#00F0FF]">ADMIN UNLOCKED (PIN: 38729)</span>
           <h1 class="text-2xl md:text-3xl font-extrabold">AniNex Command Studio</h1>
         </div>
-        <button type="button" onclick="logoutAdmin()" class="px-4 py-2.5 rounded-2xl text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 hover:bg-rose-500/30">
-          Lock & Exit Admin
+        <button onclick="logoutAdmin()" class="px-4 py-2 rounded-xl text-xs font-bold bg-red-500/20 text-red-300 border border-red-500/30">
+          🔒 Lock & Exit Admin
         </button>
       </div>
 
-      <!-- Admin Sub-Tabs -->
+      <!-- Admin Tabs -->
       <div class="flex flex-wrap gap-2">
-        <button type="button" onclick="switchAdminTab('upload', this)" class="admin-tab px-4 py-2.5 rounded-2xl text-xs font-bold btn-primary">1. Auto-Fetch & Upload Anime</button>
-        <button type="button" onclick="switchAdminTab('payments', this)" class="admin-tab px-4 py-2.5 rounded-2xl text-xs font-bold bg-white/10">2. Approve ₹49 UPI Payments</button>
-        <button type="button" onclick="switchAdminTab('theme', this)" class="admin-tab px-4 py-2.5 rounded-2xl text-xs font-bold bg-white/10">3. Live Theme & Banner</button>
+        <button onclick="switchAdminTab('upload')" id="tabBtn-upload" class="px-4 py-2 rounded-xl text-xs font-bold btn-primary">1. Add Anime via URL / Auto-Fetch</button>
+        <button onclick="switchAdminTab('payments')" id="tabBtn-payments" class="px-4 py-2 rounded-xl text-xs font-bold bg-white/10">2. Approve ₹49 UPI Payments</button>
+        <button onclick="switchAdminTab('theme')" id="tabBtn-theme" class="px-4 py-2 rounded-xl text-xs font-bold bg-white/10">3. Live Theme & Banner</button>
       </div>
 
-      <!-- Admin Tab 1: Auto-Fetch & Publish Anime -->
+      <!-- Admin Tab 1: Add Anime via URL & Auto-Fetch -->
       <div id="admin-tab-upload" class="glass-card rounded-3xl p-6 space-y-5">
-        <h2 class="text-lg font-bold">Auto-Fetch Metadata & Publish Anime Live</h2>
-        <div class="flex flex-col sm:flex-row gap-2">
-          <input id="adminFetchQuery" type="text" placeholder="Enter Anime Title or MAL ID (e.g. Solo Leveling, Naruto)..."
-            class="flex-1 bg-white/5 border border-white/15 rounded-2xl px-4 py-2.5 text-sm" />
-          <button type="button" onclick="adminAutoFetch()" class="px-5 py-2.5 rounded-2xl font-extrabold text-xs btn-cyber shrink-0">
-            ⚡ Auto-Fetch from MAL
+        <h2 class="text-lg font-bold">Auto-Fetch Anime & Add Stream URLs (.mp4 / .m3u8 / YouTube Embed)</h2>
+        <div class="flex gap-2">
+          <input id="adminFetchQuery" type="text" placeholder="Type Anime Name (e.g. Solo Leveling, Naruto)..."
+            class="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
+          <button onclick="adminAutoFetch()" class="px-5 py-2.5 rounded-xl font-bold text-xs bg-[#00F0FF] text-black shrink-0">
+            ⚡ Auto-Fetch Info
           </button>
         </div>
 
         <div class="grid md:grid-cols-2 gap-4">
-          <input id="upTitle" type="text" placeholder="Anime Title *" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
+          <input id="upTitle" type="text" placeholder="Anime Title" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
           <input id="upAudio" type="text" value="Hindi Dub" placeholder="Audio Tag (Hindi Dub / Multi-Audio)" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
           <input id="upPoster" type="text" placeholder="Poster Image URL" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
-          <input id="upBanner" type="text" placeholder="Wide Hero Backdrop URL" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
+          <input id="upBanner" type="text" placeholder="Wide Backdrop URL" class="bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm" />
         </div>
-        <textarea id="upSynopsis" rows="2" placeholder="Synopsis..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm"></textarea>
+        <textarea id="upSynopsis" rows="2" placeholder="Anime Synopsis..." class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm"></textarea>
 
-        <!-- Episode Builder -->
+        <!-- Episode URL Builder -->
         <div class="p-4 rounded-2xl bg-black/40 border border-white/10 space-y-3">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-slate-300">Episode Video Streams (.mp4 / .m3u8)</span>
-            <button type="button" onclick="addEpisodeRow()" class="px-3 py-1 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20">+ Add Episode</button>
+            <span class="text-xs font-bold text-gray-300">Episode Video Links (.mp4, .m3u8, or https://www.youtube.com/embed/...)</span>
           </div>
           <div id="episodeInputs" class="space-y-2">
             <div class="grid grid-cols-12 gap-2 ep-row">
-              <input type="number" value="1" class="col-span-2 bg-white/5 border border-white/10 rounded-lg px-2 py-2 text-xs ep-num" />
-              <input type="text" value="Episode 1" class="col-span-4 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs ep-title" />
-              <input type="text" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" class="col-span-6 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs ep-url" placeholder="https://.../ep1.mp4 or .m3u8" />
+              <input type="number" value="1" class="col-span-2 bg-white/5 border border-white/10 rounded-lg px-2 py-2 text-xs ep-num" placeholder="Ep" />
+              <input type="text" value="Episode 1" class="col-span-4 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs ep-title" placeholder="Title" />
+              <input type="text" class="col-span-6 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs ep-url" placeholder="Paste .mp4, .m3u8, or YouTube embed URL" />
             </div>
           </div>
+          <button onclick="addEpisodeRow()" class="text-xs font-semibold text-[#00F0FF]">+ Add Another Episode</button>
         </div>
 
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <label class="flex items-center gap-2 text-xs cursor-pointer">
-            <input id="upFeatured" type="checkbox" checked class="accent-[#FF2A5F]" /> Pin to Hero Spotlight
+          <label class="flex items-center gap-2 text-xs">
+            <input id="upFeatured" type="checkbox" class="accent-[#FF2A5F]" /> Pin to Hero Spotlight
           </label>
-          <button type="button" onclick="publishCustomAnime()" class="btn-primary px-6 py-3 rounded-2xl font-bold text-sm">
+          <button onclick="publishCustomAnime()" class="btn-primary px-6 py-3 rounded-xl font-bold text-sm">
             🚀 Publish Live to AniNex
           </button>
         </div>
 
-        <!-- Published Custom Anime List -->
+        <!-- Manage Published Anime -->
         <div class="pt-4 border-t border-white/10 space-y-2">
-          <h3 class="text-xs font-mono uppercase text-slate-400 font-bold">Published Custom Anime</h3>
-          <div id="adminCustomAnimeList" class="space-y-2 text-xs"></div>
+          <h3 class="text-xs font-bold text-gray-400 uppercase">Published Custom Anime</h3>
+          <div id="adminAnimeList" class="space-y-2 text-xs"></div>
         </div>
       </div>
 
-      <!-- Admin Tab 2: Approve UPI Payments -->
+      <!-- Admin Tab 2: UPI Payment Verification -->
       <div id="admin-tab-payments" class="hidden glass-card rounded-3xl p-6 space-y-4">
-        <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold">UPI Subscription Verification (9226014759@fam)</h2>
-          <button type="button" onclick="loadAdminPayments()" class="text-xs font-bold text-[#00F0FF]">↻ Refresh</button>
-        </div>
+        <h2 class="text-lg font-bold">Incoming UPI Payments (9226014759@fam)</h2>
         <div id="adminPaymentsList" class="space-y-3 text-xs"></div>
       </div>
 
@@ -464,385 +341,214 @@
         <h2 class="text-lg font-bold">Customize Site Appearance Live</h2>
         <div class="grid md:grid-cols-2 gap-4">
           <div>
-            <label class="text-xs text-slate-400">Primary Neon Color</label>
-            <input id="setPrimary" type="color" value="#FF2A5F" class="w-full h-11 rounded-xl bg-transparent cursor-pointer mt-1" />
+            <label class="text-xs text-gray-400">Primary Neon Color</label>
+            <input id="setPrimary" type="color" value="#FF2A5F" class="w-full h-10 rounded-lg bg-transparent" />
           </div>
           <div>
-            <label class="text-xs text-slate-400">Secondary Cyber Color</label>
-            <input id="setAccent" type="color" value="#00F0FF" class="w-full h-11 rounded-xl bg-transparent cursor-pointer mt-1" />
+            <label class="text-xs text-gray-400">Secondary Cyber Color</label>
+            <input id="setAccent" type="color" value="#00F0FF" class="w-full h-10 rounded-lg bg-transparent" />
           </div>
         </div>
         <div>
-          <label class="text-xs text-slate-400">Top Announcement Banner</label>
+          <label class="text-xs text-gray-400">Top Announcement Banner</label>
           <input id="setBanner" type="text" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-2.5 text-sm mt-1" />
         </div>
-        <button type="button" onclick="saveAdminSettings()" class="btn-primary px-6 py-3 rounded-2xl font-bold text-sm">Save Live Changes</button>
+        <button onclick="saveAdminSettings()" class="btn-primary px-6 py-3 rounded-xl font-bold text-sm">Save Live Changes</button>
       </div>
     </section>
+
   </main>
 
-  <!-- FLOATING BOTTOM SPATIAL GLASS NAVIGATION DOCK -->
-  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 glass rounded-full px-2.5 py-2 flex items-center gap-1 sm:gap-2 shadow-2xl border border-white/15">
-    <button type="button" onclick="navigate('discover')" data-nav="discover" class="nav-btn px-3.5 sm:px-5 py-2 rounded-full text-xs font-bold btn-primary transition">Discover</button>
-    <button type="button" onclick="navigate('explore')" data-nav="explore" class="nav-btn px-3.5 sm:px-5 py-2 rounded-full text-xs font-semibold text-slate-300 hover:text-white transition">Explore</button>
-    <button type="button" onclick="navigate('schedule')" data-nav="schedule" class="nav-btn px-3.5 sm:px-5 py-2 rounded-full text-xs font-semibold text-slate-300 hover:text-white transition">Schedule</button>
-    <button type="button" onclick="navigate('mylist')" data-nav="mylist" class="nav-btn px-3.5 sm:px-5 py-2 rounded-full text-xs font-semibold text-slate-300 hover:text-white transition">My List</button>
-    <button type="button" onclick="navigate('vip')" data-nav="vip" class="nav-btn px-3.5 sm:px-5 py-2 rounded-full text-xs font-bold text-amber-300 hover:text-amber-200 transition">AniNex+</button>
+  <!-- Floating Bottom Navigation Dock -->
+  <nav class="fixed bottom-4 left-1/2 -translate-x-1/2 z-40 glass rounded-full px-3 py-2 flex items-center gap-1 sm:gap-2 shadow-2xl">
+    <button onclick="navigate('discover')" data-nav="discover" class="nav-btn px-3.5 py-2 rounded-full text-xs font-bold btn-primary">Discover</button>
+    <button onclick="navigate('explore')" data-nav="explore" class="nav-btn px-3.5 py-2 rounded-full text-xs font-semibold text-gray-300">Explore</button>
+    <button onclick="navigate('schedule')" data-nav="schedule" class="nav-btn px-3.5 py-2 rounded-full text-xs font-semibold text-gray-300">Schedule</button>
+    <button onclick="navigate('mylist')" data-nav="mylist" class="nav-btn px-3.5 py-2 rounded-full text-xs font-semibold text-gray-300">My List</button>
+    <button onclick="navigate('vip')" data-nav="vip" class="nav-btn px-3.5 py-2 rounded-full text-xs font-semibold text-amber-300">AniNex+</button>
   </nav>
 
-  <!-- ========================================================= -->
-  <!-- MODAL 1: STREAMING & EPISODE DOWNLOAD PLAYER              -->
-  <!-- ========================================================= -->
-  <div id="playerModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-xl overflow-y-auto p-3 sm:p-6">
-    <div class="max-w-5xl mx-auto glass-card rounded-3xl overflow-hidden shadow-2xl">
+  <!-- ================= STREAMING & DOWNLOAD PLAYER MODAL ================= -->
+  <div id="playerModal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-xl overflow-y-auto p-4 md:p-8">
+    <div class="max-w-5xl mx-auto glass-card rounded-3xl overflow-hidden">
       <div class="flex items-center justify-between p-4 border-b border-white/10">
-        <div class="flex items-center gap-2 min-w-0">
-          <span id="playerEpBadge" class="px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold btn-primary shrink-0">EP 01</span>
-          <h3 id="playerTitle" class="font-bold text-base sm:text-lg truncate">Anime Player</h3>
-        </div>
-        <button type="button" onclick="closePlayer()" class="w-9 h-9 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center shrink-0">✕</button>
+        <h3 id="playerTitle" class="font-bold text-lg truncate">Anime Player</h3>
+        <button onclick="closePlayer()" class="px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/20 text-xs font-bold">✕ Close</button>
       </div>
 
-      <!-- Video Screen -->
-      <div class="relative aspect-video bg-black flex items-center justify-center overflow-hidden">
-        <video id="html5Player" controls playsinline class="w-full h-full hidden bg-black"></video>
+      <!-- Video & Iframe Screen -->
+      <div class="relative aspect-video bg-black flex items-center justify-center">
+        <video id="html5Player" controls playsinline class="w-full h-full hidden"></video>
+        <iframe id="embedPlayer" class="w-full h-full hidden" frameborder="0" allowfullscreen allow="autoplay; encrypted-media"></iframe>
+
         <div id="playerLockOverlay" class="hidden text-center p-6 space-y-4 max-w-md">
-          <div class="w-14 h-14 rounded-2xl btn-primary mx-auto flex items-center justify-center text-2xl shadow-lg">🔒</div>
-          <h4 class="text-xl font-bold">Unlock Episode <span id="lockedEpNum">2</span> & Downloads</h4>
-          <p class="text-xs text-slate-300">Watch 3 short sponsor ads for a free 24-hour pass, or activate our <strong>₹49/Month VIP Pass</strong> via UPI.</p>
+          <div class="w-14 h-14 rounded-2xl btn-primary mx-auto flex items-center justify-center text-2xl">🔒</div>
+          <h4 class="text-xl font-bold">Unlock Unlimited Streaming & Downloads</h4>
+          <p class="text-xs text-gray-400">Watch 3 quick sponsor ads to unlock 24 hours free, or activate ₹49/Month VIP via UPI (9226014759@fam).</p>
           <div class="flex flex-wrap justify-center gap-3">
-            <button type="button" onclick="openSponsorAdModal(true)" class="px-4 py-2.5 rounded-xl text-xs font-extrabold btn-cyber">
+            <button onclick="watchSponsorAd()" class="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#00F0FF] text-black">
               Watch Ad (<span id="modalAdCount">0</span>/3)
             </button>
-            <button type="button" onclick="closePlayer(); navigate('vip')" class="px-4 py-2.5 rounded-xl text-xs font-extrabold btn-primary">
-              Go VIP (₹49/mo)
+            <button onclick="closePlayer(); navigate('vip')" class="px-4 py-2.5 rounded-xl text-xs font-bold btn-primary">
+              Go VIP (₹49/Mo)
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Player Controls, Audio Switcher, Download & Episode Selector -->
-      <div class="p-5 sm:p-6 space-y-5">
+      <!-- Controls, Episode Selector & Download Button -->
+      <div class="p-6 space-y-5">
         <div class="flex flex-wrap items-center justify-between gap-3">
-          <div class="flex flex-wrap items-center gap-2">
-            <button type="button" onclick="setPlayerAudio('Hindi Dub', this)" class="p-audio-btn px-3 py-1.5 rounded-xl text-xs font-bold btn-primary">Hindi Dub</button>
-            <button type="button" onclick="setPlayerAudio('Multi-Audio', this)" class="p-audio-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10">Multi-Audio</button>
-            <button type="button" onclick="setPlayerAudio('Japanese Sub', this)" class="p-audio-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10">Japanese Sub</button>
+          <div class="flex items-center gap-2">
+            <span id="playerAudioTag" class="px-3 py-1 rounded-full text-xs font-bold bg-[#FF2A5F]/20 text-[#FF2A5F]">Hindi Dub</span>
+            <span class="px-3 py-1 rounded-full text-xs font-semibold bg-white/10">1080p Full HD</span>
           </div>
-          <div class="flex flex-wrap gap-2">
-            <button type="button" id="playerWatchlistBtn" onclick="toggleWatchlistCurrent()" class="px-4 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20 flex items-center gap-1.5">
-              <i class="ph-bold ph-bookmark-simple"></i> <span>Save to My List</span>
+          <div class="flex gap-2">
+            <button onclick="toggleWatchlistCurrent()" class="px-4 py-2 rounded-xl text-xs font-bold bg-white/10 hover:bg-white/20">
+              + My List
             </button>
-            <button type="button" onclick="downloadCurrentEpisode()" class="px-4 py-2 rounded-xl text-xs font-extrabold bg-emerald-500 text-black hover:opacity-90 flex items-center gap-1.5">
-              <i class="ph-bold ph-download-simple"></i> <span>Download Episode</span>
-            </button>
+            <a id="downloadEpBtn" href="#" target="_blank" download class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-black hover:opacity-90">
+              ⬇ Download Episode
+            </a>
           </div>
         </div>
-
-        <p id="playerSynopsis" class="text-xs text-slate-300 leading-relaxed"></p>
-
+        <p id="playerSynopsis" class="text-xs text-gray-300 leading-relaxed"></p>
         <div>
-          <h4 class="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 mb-3">Episodes (Ep 1 Free • Ep 2+ Unlocked via 3 Ads or ₹49/mo VIP)</h4>
-          <div id="playerEpisodesList" class="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-8 gap-2"></div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Episodes</h4>
+          <div id="playerEpisodesList" class="grid grid-cols-3 sm:grid-cols-6 gap-2"></div>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- MODAL 2: 5-SECOND SPONSOR AD PLAYER (3-AD UNLOCK ENGINE)  -->
-  <!-- ========================================================= -->
-  <div id="sponsorAdModal" class="hidden fixed inset-0 z-[60] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
-    <div class="max-w-md w-full glass-card rounded-3xl p-6 space-y-5 border border-[#00F0FF]/40 text-center">
-      <div class="flex items-center justify-between text-xs font-mono">
-        <span class="px-2.5 py-1 rounded-lg bg-[#00F0FF]/20 text-[#00F0FF] font-bold">SPONSOR AD <span id="adStepNum">1</span>/3</span>
-        <span id="adCountdownText" class="text-amber-300 font-bold">05s remaining</span>
-      </div>
-      <div class="p-5 rounded-2xl bg-gradient-to-br from-purple-900/40 to-cyan-900/30 border border-white/10 space-y-2">
-        <i class="ph-fill ph-sparkle text-4xl text-[#00F0FF]"></i>
-        <h3 id="adSponsorTitle" class="text-lg font-extrabold text-white">AniNex Ultra 4K Cloud</h3>
-        <p id="adSponsorDesc" class="text-xs text-slate-300">Stream your favorite seasonal anime in crisp 1080p & Hindi Dub anywhere on mobile!</p>
-      </div>
-      <div class="w-full h-2 rounded-full bg-white/10 overflow-hidden">
-        <div id="adProgressBar" class="h-full btn-cyber transition-all duration-200" style="width: 0%"></div>
-      </div>
-      <div class="flex gap-2">
-        <button type="button" onclick="closeSponsorAdModal()" class="px-4 py-3 rounded-xl text-xs font-semibold bg-white/10">Cancel</button>
-        <button type="button" id="claimAdBtn" disabled onclick="claimAdCredit()" class="flex-1 py-3 rounded-xl text-xs font-extrabold bg-white/10 text-slate-400 cursor-not-allowed">
-          Wait 5s to Claim Credit...
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- MODAL 3: UPI SUBSCRIPTION CHECKOUT (9226014759@fam)       -->
-  <!-- ========================================================= -->
-  <div id="upiModal" class="hidden fixed inset-0 z-[60] bg-black/90 backdrop-blur-lg flex items-center justify-center p-4 overflow-y-auto">
-    <div class="max-w-md w-full glass-card rounded-3xl p-6 space-y-4 border border-[#FF2A5F]/40">
+  <!-- ================= UPI PAYMENT MODAL (9226014759@fam) ================= -->
+  <div id="upiModal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-lg flex items-center justify-center p-4">
+    <div class="max-w-md w-full glass-card rounded-3xl p-6 space-y-5">
       <div class="flex items-center justify-between">
-        <h3 class="font-bold text-lg">UPI Checkout — <span id="upiPlanTitle" class="text-[#00F0FF]">Monthly VIP Pass</span></h3>
-        <button type="button" onclick="document.getElementById('upiModal').classList.add('hidden')" class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">✕</button>
+        <h3 class="font-bold text-lg">Pay via UPI — <span id="upiPlanTitle" class="text-[#00F0FF]"></span></h3>
+        <button onclick="document.getElementById('upiModal').classList.add('hidden')" class="text-gray-400">✕</button>
       </div>
 
-      <div class="bg-white p-4 rounded-2xl text-center space-y-2 shadow-inner">
-        <img id="upiQrImg" src="" alt="UPI QR Code" class="w-44 h-44 mx-auto rounded-lg" />
-        <div class="flex items-center justify-center gap-2">
-          <p class="text-black font-extrabold text-sm font-mono">9226014759@fam</p>
-          <button type="button" onclick="copyUpiId()" class="px-2 py-0.5 rounded bg-slate-200 hover:bg-slate-300 text-black text-[11px] font-bold">Copy</button>
-        </div>
-        <p class="text-slate-600 text-[11px]">Scan with GPay, PhonePe, Paytm, or FamPay</p>
+      <div class="bg-white p-4 rounded-2xl text-center space-y-2">
+        <img id="upiQrImg" src="" alt="UPI QR Code" class="w-44 h-44 mx-auto" />
+        <p class="text-black font-extrabold text-sm">UPI ID: 9226014759@fam</p>
+        <p class="text-gray-600 text-xs">Scan with GPay, PhonePe, Paytm, or FamPay</p>
       </div>
 
-      <a id="upiDeepLink" href="#" class="block w-full text-center py-3 rounded-2xl font-extrabold text-sm btn-primary">
-        📲 Pay ₹<span id="upiPayAmt">49</span> via UPI App
+      <a id="upiDeepLink" href="#" class="block w-full text-center py-3 rounded-xl font-bold text-sm btn-primary">
+        📲 Open UPI App & Pay ₹<span id="upiPayAmt">49</span>
       </a>
 
-      <div class="space-y-2.5 pt-2 border-t border-white/10">
-        <label class="text-xs font-semibold text-slate-300 block">Enter 12-Digit UPI UTR / Reference Number after paying:</label>
-        <input id="upiUtrInput" type="text" maxlength="12" inputmode="numeric" placeholder="e.g. 632189450123"
-          class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm font-mono tracking-widest text-white" />
+      <div class="space-y-2 pt-2 border-t border-white/10">
+        <label class="text-xs font-semibold text-gray-300">Enter 12-Digit UPI Reference / UTR Number after paying:</label>
+        <input id="upiUtrInput" type="text" maxlength="12" placeholder="e.g. 632189450123"
+          class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2.5 text-sm tracking-widest" />
         <input id="upiPayerName" type="text" placeholder="Your Name (Optional)"
-          class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2 text-xs text-white" />
-        <button type="button" onclick="submitUpiUtr()" class="w-full py-3 rounded-2xl font-extrabold text-xs bg-emerald-500 text-black hover:opacity-95 transition">
+          class="w-full bg-white/5 border border-white/15 rounded-xl px-4 py-2 text-xs" />
+        <button onclick="submitUpiUtr()" class="w-full py-3 rounded-xl font-bold text-xs bg-emerald-500 text-black">
           ✓ Submit UTR for VIP Activation
         </button>
       </div>
     </div>
   </div>
 
-  <!-- ========================================================= -->
-  <!-- MODAL 4: HIDDEN ADMIN PIN LOCK SCREEN (38729)             -->
-  <!-- ========================================================= -->
-  <div id="adminPinModal" class="hidden fixed inset-0 z-[70] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-4">
-    <div class="max-w-xs w-full glass-card rounded-3xl p-6 text-center space-y-5 border border-[#00F0FF]/30">
-      <div class="w-12 h-12 rounded-2xl btn-primary mx-auto flex items-center justify-center text-xl shadow-lg">🔐</div>
+  <!-- ================= HIDDEN ADMIN PIN LOCK MODAL (38729) ================= -->
+  <div id="adminPinModal" class="hidden fixed inset-0 z-50 bg-black/95 backdrop-blur-xl flex items-center justify-center p-4">
+    <div class="max-w-xs w-full glass-card rounded-3xl p-6 text-center space-y-5 border-[#00F0FF]/40">
+      <div class="w-12 h-12 rounded-2xl btn-primary mx-auto flex items-center justify-center text-xl font-bold">🔐</div>
       <div>
-        <span class="text-[10px] font-mono uppercase tracking-widest text-[#00F0FF]">AniNex/path/Admin</span>
-        <h3 class="font-extrabold text-xl mt-0.5">Enter Admin PIN</h3>
-        <p class="text-xs text-slate-400">Enter 5-digit security PIN to unlock Studio</p>
+        <h3 class="font-extrabold text-lg">Restricted Admin Path</h3>
+        <p class="text-xs text-gray-400">Enter 5-Digit Security PIN for AniNex/path/Admin</p>
       </div>
-      <input id="adminPinInput" type="password" maxlength="5" inputmode="numeric" placeholder="• • • • •"
-        class="w-full text-center text-2xl tracking-[0.5em] font-mono font-bold bg-white/5 border border-white/15 rounded-2xl py-3 text-white focus:outline-none focus:border-[#00F0FF]" />
-      <p id="pinError" class="text-xs font-bold text-rose-400 hidden">Incorrect Security PIN</p>
+      <input id="adminPinInput" type="password" inputmode="numeric" maxlength="5" placeholder="• • • • •"
+        class="w-full text-center text-2xl tracking-[0.5em] font-bold bg-white/5 border border-white/15 rounded-xl py-3 focus:outline-none focus:border-[#00F0FF]" />
+      <p id="pinError" class="text-xs text-red-400 hidden">Incorrect PIN. Enter 38729.</p>
       <div class="flex gap-2">
-        <button type="button" onclick="cancelAdminPin()" class="flex-1 py-2.5 rounded-xl text-xs font-semibold bg-white/10">Cancel</button>
-        <button type="button" onclick="verifyAdminPin()" class="flex-1 py-2.5 rounded-xl text-xs font-extrabold btn-primary">Unlock</button>
+        <button onclick="cancelAdminPin()" class="flex-1 py-2.5 rounded-xl text-xs bg-white/10">Cancel</button>
+        <button onclick="verifyAdminPin()" class="flex-1 py-2.5 rounded-xl text-xs font-bold btn-primary">Unlock</button>
       </div>
     </div>
   </div>
 
-  <!-- Toast Banner -->
-  <div id="toastBox" class="fixed top-20 right-4 z-[80] flex flex-col gap-2 pointer-events-none"></div>
-
   <script>
-    // =========================================================================
-    // 1. PERSISTENT STATE & RESILIENT CACHE (WORKS 100% STANDALONE OR WITH API)
-    // =========================================================================
-    const API_BASE = window.location.origin.startsWith('http') && !window.location.hostname.includes('googleusercontent')
-      ? ''
-      : '';
-    const DEVICE_ID = localStorage.getItem('aninex_device_id') || ('dev_' + Math.random().toString(36).slice(2, 11));
-    localStorage.setItem('aninex_device_id', DEVICE_ID);
-
+    const ADMIN_PIN_CODE = '38729';
     const FALLBACK_ANIME = [
       {
         mal_id: 52991,
         title: "Frieren: Beyond Journey's End",
-        images: { jpg: { large_image_url: "https://cdn.myanimelist.net/images/anime/1015/138006l.jpg" } },
-        score: 9.14,
-        year: 2024,
-        audio_tag: "Hindi Dub + Multi-Audio",
-        synopsis: "An elf mage embarks on a quiet journey across decades to understand the human hearts she once traveled alongside.",
+        poster: "https://cdn.myanimelist.net/images/anime/1015/138006l.jpg",
+        score: 9.1,
+        year: 2026,
+        audio_tag: "Hindi Dub",
+        synopsis: "After a 10-year quest to defeat the Demon King, elf mage Frieren embarks on a new journey to understand humanity.",
         episodes: [
           { num: 1, title: "The Journey's End", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-          { num: 2, title: "It Didn't Have to Be Magic", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" },
-          { num: 3, title: "Killing Magic", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" }
+          { num: 2, title: "It Didn't Have to Be Magic", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }
         ]
       },
       {
         mal_id: 52299,
-        title: "Solo Leveling Season 2: Arise from the Shadow",
-        images: { jpg: { large_image_url: "https://cdn.myanimelist.net/images/anime/1448/147351l.jpg" } },
-        score: 8.95,
-        year: 2025,
+        title: "Solo Leveling Season 2",
+        poster: "https://cdn.myanimelist.net/images/anime/1926/140799l.jpg",
+        score: 8.9,
+        year: 2026,
         audio_tag: "Hindi Dub",
-        synopsis: "Sung Jinwoo steps into the Red Gate and commands an unstoppable army of Shadow Monarch soldiers.",
+        synopsis: "Sung Jinwoo rises from the world's weakest hunter to the Shadow Monarch.",
         episodes: [
-          { num: 1, title: "You Aren't E-Rank, Are You?", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-          { num: 2, title: "I Suppose You Aren't Aware", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" }
-        ]
-      },
-      {
-        mal_id: 51009,
-        title: "Jujutsu Kaisen: Shibuya Incident",
-        images: { jpg: { large_image_url: "https://cdn.myanimelist.net/images/anime/1792/138022l.jpg" } },
-        score: 8.85,
-        year: 2024,
-        audio_tag: "Multi-Audio",
-        synopsis: "Curses and sorcerers collide in Shibuya on Halloween night as Satoru Gojo faces an ambush.",
-        episodes: [
-          { num: 1, title: "Hidden Inventory", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-          { num: 2, title: "Premature Death", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4" }
-        ]
-      },
-      {
-        mal_id: 21,
-        title: "One Piece: Egghead Arc",
-        images: { jpg: { large_image_url: "https://cdn.myanimelist.net/images/anime/1244/138851l.jpg" } },
-        score: 8.73,
-        year: 2025,
-        audio_tag: "Hindi Dub + Sub",
-        synopsis: "Monkey D. Luffy and the Straw Hat Pirates arrive at Dr. Vegapunk's futuristic island Egghead.",
-        episodes: [
-          { num: 1, title: "Future Island Egghead", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-          { num: 2, title: "CP0 Infiltration", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }
-        ]
-      },
-      {
-        mal_id: 38000,
-        title: "Demon Slayer: Hashira Training Arc",
-        images: { jpg: { large_image_url: "https://cdn.myanimelist.net/images/anime/1565/142711l.jpg" } },
-        score: 8.62,
-        year: 2024,
-        audio_tag: "Hindi Dub",
-        synopsis: "Tanjiro undergoes grueling training under the Stone Hashira Gyomei Himejima before the Infinity Castle battle.",
-        episodes: [
-          { num: 1, title: "To Defeat Muzan Kibutsuji", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
-          { num: 2, title: "Water Hashira Giyu's Pain", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" }
+          { num: 1, title: "Arise", url: "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" },
+          { num: 2, title: "Red Gate", url: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4" }
         ]
       }
     ];
 
     let state = {
-      settings: JSON.parse(localStorage.getItem('aninex_settings')) || {
-        primaryColor: '#FF2A5F',
-        accentColor: '#00F0FF',
-        bannerText: '🔥 Watch 3 Ads for 24h Unlimited Streaming or Activate ₹49/Month VIP via UPI (9226014759@fam)!',
-        upiId: '9226014759@fam'
-      },
-      customAnime: JSON.parse(localStorage.getItem('aninex_custom_anime')) || [...FALLBACK_ANIME.slice(0, 3)],
-      user: JSON.parse(localStorage.getItem('aninex_user_state')) || {
-        isVip: false,
-        vipUntil: 0,
-        hasAdPass: false,
-        adPassUntil: 0,
-        adsWatchedToday: 0,
-        lastAdDate: new Date().toDateString()
-      },
-      payments: JSON.parse(localStorage.getItem('aninex_upi_payments')) || [],
-      watchlist: JSON.parse(localStorage.getItem('aninex_watchlist')) || [],
-      history: JSON.parse(localStorage.getItem('aninex_history')) || [],
-      jikanCache: {},
+      settings: JSON.parse(localStorage.getItem('aninex_settings') || '{"primaryColor":"#FF2A5F","accentColor":"#00F0FF","bannerText":"🔥 Watch 3 Ads for 24h Unlimited Streaming or Go VIP at ₹49/Month via UPI (9226014759@fam)!","upiId":"9226014759@fam"}'),
+      customAnime: JSON.parse(localStorage.getItem('aninex_custom_anime') || '[]'),
+      payments: JSON.parse(localStorage.getItem('aninex_payments') || '[]'),
+      watchlist: JSON.parse(localStorage.getItem('aninex_watchlist') || '[]'),
+      user: JSON.parse(localStorage.getItem('aninex_user') || '{"isVip":false,"adPassUntil":0,"adsWatchedToday":0,"lastAdDate":""}'),
+      adminUnlocked: sessionStorage.getItem('aninex_admin_unlocked') === 'true',
       currentAnime: null,
-      currentEpisode: null,
-      selectedPlan: null,
-      adminUnlocked: false,
-      resumeAfterAd: false
+      selectedPlan: null
     };
 
-    function persistLocalState() {
-      localStorage.setItem('aninex_settings', JSON.stringify(state.settings));
-      localStorage.setItem('aninex_custom_anime', JSON.stringify(state.customAnime));
-      localStorage.setItem('aninex_user_state', JSON.stringify(state.user));
-      localStorage.setItem('aninex_upi_payments', JSON.stringify(state.payments));
-      localStorage.setItem('aninex_watchlist', JSON.stringify(state.watchlist));
-      localStorage.setItem('aninex_history', JSON.stringify(state.history));
+    // Reset daily ad counter if date changed
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (state.user.lastAdDate !== todayStr) {
+      state.user.adsWatchedToday = 0;
+      state.user.lastAdDate = todayStr;
+      saveUserState();
     }
 
-    function showToast(msg, colorClass = 'text-[#00F0FF]') {
-      const box = document.getElementById('toastBox');
-      if (!box) return;
-      const el = document.createElement('div');
-      el.className = 'glass px-4 py-2.5 rounded-2xl text-xs font-bold text-white shadow-2xl border border-white/15 flex items-center gap-2 transition-all';
-      el.innerHTML = `<i class="ph-fill ph-sparkle ${colorClass} text-base"></i><span>${escapeHtml(msg)}</span>`;
-      box.appendChild(el);
-      setTimeout(() => { el.style.opacity = '0'; setTimeout(() => el.remove(), 300); }, 2800);
+    function saveUserState() {
+      localStorage.setItem('aninex_user', JSON.stringify(state.user));
     }
 
-    function escapeHtml(str) {
-      return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    function hasUnlimitedAccess() {
+      return state.user.isVip || (state.user.adPassUntil && state.user.adPassUntil > Date.now());
     }
 
-    function normalizeUserPassState() {
-      const today = new Date().toDateString();
-      if (state.user.lastAdDate !== today) {
-        state.user.adsWatchedToday = 0;
-        state.user.lastAdDate = today;
+    // ================= HIDDEN ADMIN GATE (PIN: 38729) =================
+    function openAdminPinGate() {
+      if (state.adminUnlocked) {
+        navigate('admin');
+        renderAdminLists();
+        return;
       }
-      const now = Date.now();
-      state.user.isVip = (state.user.vipUntil || 0) > now;
-      state.user.hasAdPass = (state.user.adPassUntil || 0) > now;
-      state.user.hasUnlimitedAccess = state.user.isVip || state.user.hasAdPass;
-      persistLocalState();
-    }
-
-    // =========================================================================
-    // 2. NAVIGATION CONTROLLER (DISCOVER, EXPLORE, SCHEDULE, MY LIST, ANINEX+)
-    // =========================================================================
-    function navigate(view) {
-      const views = ['discover', 'explore', 'schedule', 'mylist', 'vip', 'admin'];
-      views.forEach(v => {
-        const el = document.getElementById(`view-${v}`);
-        if (el) el.classList.toggle('hidden', v !== view);
-      });
-
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('btn-primary', 'text-white');
-        if (btn.dataset.nav === 'vip') {
-          btn.classList.add('text-amber-300');
-        } else {
-          btn.classList.add('text-slate-300');
-        }
-        if (btn.dataset.nav === view) {
-          btn.classList.remove('text-slate-300', 'text-amber-300');
-          btn.classList.add('btn-primary', 'text-white');
-        }
-      });
-
-      if (view === 'explore') {
-        const firstBtn = document.querySelector('#genrePills .genre-btn');
-        filterExplore('all', firstBtn);
-      } else if (view === 'schedule') {
-        const days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-        loadSchedule(days[new Date().getDay()]);
-      } else if (view === 'mylist') {
-        renderMyListView();
-      } else if (view === 'vip') {
-        applyThemeAndPass();
-        renderMyPayments();
-      }
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // =========================================================================
-    // 3. HIDDEN ADMIN ROUTE (/AniNex/path/Admin -> PIN: 38729)
-    // =========================================================================
-    function checkAdminRoute() {
-      const combined = decodeURIComponent(window.location.pathname + window.location.hash).toLowerCase();
-      if (combined.includes('aninex/path/admin')) {
-        if (state.adminUnlocked) {
-          navigate('admin');
-          loadAdminPayments();
-          renderAdminCustomAnimeList();
-        } else {
-          document.getElementById('adminPinInput').value = '';
-          document.getElementById('pinError').classList.add('hidden');
-          document.getElementById('adminPinModal').classList.remove('hidden');
-        }
-      }
+      document.getElementById('pinError').classList.add('hidden');
+      document.getElementById('adminPinInput').value = '';
+      document.getElementById('adminPinModal').classList.remove('hidden');
+      setTimeout(() => document.getElementById('adminPinInput').focus(), 100);
     }
 
     function verifyAdminPin() {
-      const pin = document.getElementById('adminPinInput').value.trim();
-      if (pin === '38729') {
+      const val = document.getElementById('adminPinInput').value.trim();
+      if (val === ADMIN_PIN_CODE) {
         state.adminUnlocked = true;
+        sessionStorage.setItem('aninex_admin_unlocked', 'true');
         document.getElementById('adminPinModal').classList.add('hidden');
-        showToast('Admin Studio Unlocked!');
         navigate('admin');
-        loadAdminPayments();
-        renderAdminCustomAnimeList();
+        renderAdminLists();
       } else {
         document.getElementById('pinError').classList.remove('hidden');
       }
@@ -850,536 +556,374 @@
 
     function cancelAdminPin() {
       document.getElementById('adminPinModal').classList.add('hidden');
-      if (window.location.hash.toLowerCase().includes('aninex/path/admin')) {
-        history.replaceState(null, '', window.location.pathname + window.location.search);
+      if (window.location.hash.toLowerCase().includes('admin')) {
+        history.replaceState(null, '', window.location.pathname);
       }
-      navigate('discover');
     }
 
     function logoutAdmin() {
       state.adminUnlocked = false;
-      if (window.location.hash.toLowerCase().includes('aninex/path/admin')) {
-        history.replaceState(null, '', window.location.pathname + window.location.search);
-      }
+      sessionStorage.removeItem('aninex_admin_unlocked');
+      history.replaceState(null, '', window.location.pathname);
       navigate('discover');
-      showToast('Admin Session Locked');
     }
 
-    // =========================================================================
-    // 4. JIKAN V4 API WITH SMART CACHE & FALLBACK
-    // =========================================================================
-    async function fetchJikanCached(endpoint, fallbackList = FALLBACK_ANIME) {
-      if (state.jikanCache[endpoint]) return state.jikanCache[endpoint];
-      try {
-        const res = await fetch(`https://api.jikan.moe/v4${endpoint}`);
-        if (!res.ok) throw new Error('Rate limited');
-        const json = await res.json();
-        const items = (json.data || []).map((item, idx) => ({
-          ...item,
-          audio_tag: idx % 2 === 0 ? 'Hindi Dub + Sub' : 'Multi-Audio'
-        }));
-        if (items.length) {
-          state.jikanCache[endpoint] = items;
-          return items;
-        }
-        return fallbackList;
-      } catch {
-        return fallbackList;
+    function checkAdminRoute() {
+      const full = decodeURIComponent(window.location.pathname + window.location.hash).toLowerCase();
+      if (full.includes('aninex/path/admin')) {
+        openAdminPinGate();
       }
     }
 
+    // 5-Tap Logo Trigger for Mobile Convenience
+    let tapCount = 0, tapTimer;
+    document.getElementById('brandLogoTrigger').addEventListener('click', () => {
+      tapCount++;
+      clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => { tapCount = 0; }, 1500);
+      if (tapCount >= 5) {
+        tapCount = 0;
+        openAdminPinGate();
+      } else {
+        navigate('discover');
+      }
+    });
+
+    document.getElementById('adminPinInput').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') verifyAdminPin();
+    });
+
+    // ================= NAVIGATION & THEME =================
+    function navigate(view) {
+      document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
+      const target = document.getElementById(`view-${view}`);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(b => {
+        b.classList.remove('btn-primary', 'text-white');
+        if (b.dataset.nav === view) b.classList.add('btn-primary', 'text-white');
+      });
+
+      if (view === 'explore') filterExplore('all');
+      if (view === 'schedule') loadSchedule('monday');
+      if (view === 'mylist') renderWatchlist();
+      if (view === 'vip') renderMyPayments();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function applyThemeAndPass() {
+      document.documentElement.style.setProperty('--primary', state.settings.primaryColor);
+      document.documentElement.style.setProperty('--accent', state.settings.accentColor);
+      document.getElementById('announcementBar').textContent = state.settings.bannerText;
+      document.getElementById('setPrimary').value = state.settings.primaryColor;
+      document.getElementById('setAccent').value = state.settings.accentColor;
+      document.getElementById('setBanner').value = state.settings.bannerText;
+
+      const pill = document.getElementById('passPillText');
+      const badge = document.getElementById('adProgressBadge');
+      const btn = document.getElementById('watchAdBtn');
+
+      if (state.user.isVip) {
+        pill.textContent = '👑 VIP Unlimited';
+        badge.textContent = 'VIP Active — Ads Disabled';
+      } else if (hasUnlimitedAccess()) {
+        pill.textContent = '⚡ 24h Ad-Pass';
+        badge.textContent = '3 / 3 Ads Completed (24h Unlocked!)';
+      } else {
+        const c = state.user.adsWatchedToday || 0;
+        pill.textContent = `Free (${c}/3 Ads)`;
+        badge.textContent = `${c} / 3 Ads Completed Today`;
+        btn.textContent = `▶ Watch Sponsor Ad (${c + 1}/3)`;
+      }
+    }
+
+    // ================= CARD & CATALOG RENDERING =================
     function animeCardHTML(item, rank = null) {
-      const img = item.poster || item.images?.jpg?.large_image_url || item.images?.jpg?.image_url || 'https://placehold.co/400x600/141627/FFFFFF?text=AniNex';
-      const title = item.title_english || item.title;
-      const score = item.score || '8.8';
-      const audio = item.audio_tag || 'Hindi Dub';
-      const normalized = {
-        mal_id: item.mal_id || item.id || Date.now(),
+      const img = item.poster || item.images?.jpg?.large_image_url || FALLBACK_ANIME[0].poster;
+      const title = item.title;
+      const score = item.score || '8.7';
+      const audio = item.audio_tag || 'Sub / Dub';
+      const payload = encodeURIComponent(JSON.stringify({
+        id: item.id || item.mal_id || Date.now(),
         title,
         poster: img,
-        banner: item.banner || img,
-        score,
-        year: item.year || 2026,
-        synopsis: item.synopsis || 'High-definition spatial anime stream on AniNex.',
+        synopsis: item.synopsis || 'High-definition anime stream on AniNex.',
         audio_tag: audio,
-        episodes: Array.isArray(item.episodes) && item.episodes.length ? item.episodes : [
+        episodes: item.episodes || [
           { num: 1, title: 'Episode 1', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
-          { num: 2, title: 'Episode 2', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' },
-          { num: 3, title: 'Episode 3', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' },
-          { num: 4, title: 'Episode 4', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4' }
+          { num: 2, title: 'Episode 2', url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4' }
         ]
-      };
-      const payload = encodeURIComponent(JSON.stringify(normalized));
+      }));
 
       return `
-        <div onclick="openPlayer('${payload}')" class="glass-card rounded-2xl overflow-hidden cursor-pointer relative group flex flex-col ${rank ? 'min-w-[170px] sm:min-w-[195px] shrink-0' : ''}">
-          <div class="relative aspect-[2/3] overflow-hidden bg-slate-900">
-            <img src="${img}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.src='https://placehold.co/400x600/141627/FFFFFF?text=AniNex'" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
-            <div class="absolute inset-0 bg-gradient-to-t from-[#0A0B14] via-transparent to-black/30"></div>
-            <span class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-lg text-[10px] font-extrabold btn-primary">${escapeHtml(audio)}</span>
-            <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-lg text-[10px] font-mono font-bold bg-black/75 text-amber-300 border border-white/10">★ ${score}</span>
-            ${rank ? `<span class="rank-num text-5xl sm:text-6xl absolute bottom-1 left-2.5 select-none pointer-events-none">#${rank}</span>` : ''}
+        <div onclick="openPlayer('${payload}')" class="glass-card rounded-2xl overflow-hidden cursor-pointer relative group ${rank ? 'min-w-[170px]' : ''}">
+          <div class="relative aspect-[2/3] overflow-hidden">
+            <img src="${img}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+            <span class="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-md text-[10px] font-extrabold bg-[#FF2A5F] text-white">${audio}</span>
+            <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-black/70 text-amber-300">★ ${score}</span>
+            ${rank ? `<span class="rank-num text-6xl absolute -bottom-3 left-2 select-none">${rank}</span>` : ''}
           </div>
-          <div class="p-3 flex-1 flex flex-col justify-between">
-            <h3 class="font-bold text-xs sm:text-sm line-clamp-1 text-white">${escapeHtml(title)}</h3>
-            <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 mt-1">
-              <span>${normalized.year} • HD</span>
-              <span class="text-[#00F0FF]">${normalized.episodes.length} EPS</span>
-            </div>
+          <div class="p-3">
+            <h3 class="font-bold text-xs sm:text-sm line-clamp-1">${title}</h3>
+            <p class="text-[11px] text-gray-400 mt-0.5">${item.year || '2026'} • HD Stream</p>
           </div>
         </div>`;
     }
 
     function renderExclusives() {
       const grid = document.getElementById('exclusivesGrid');
-      const countEl = document.getElementById('exclusivesCount');
-      countEl.textContent = `${state.customAnime.length} LIVE SHOWS`;
-      grid.innerHTML = state.customAnime.map(a => animeCardHTML(a)).join('');
+      const list = state.customAnime.length ? state.customAnime : FALLBACK_ANIME;
+      grid.innerHTML = list.map(a => animeCardHTML(a)).join('');
 
-      const featured = state.customAnime.find(a => a.featured) || state.customAnime[0];
+      const featured = list.find(a => a.featured) || list[0];
       if (featured) {
         document.getElementById('heroTitle').textContent = featured.title;
         document.getElementById('heroDesc').textContent = featured.synopsis;
         document.getElementById('heroImg').src = featured.banner || featured.poster;
-        document.getElementById('heroAudio').textContent = featured.audio_tag;
-        document.getElementById('heroScore').textContent = `★ ${featured.score || '9.1'}`;
-        document.getElementById('heroWatchBtn').onclick = () => {
-          const cardEl = document.createElement('div');
-          cardEl.innerHTML = animeCardHTML(featured);
-          cardEl.firstElementChild.click();
-        };
+        document.getElementById('heroAudio').textContent = featured.audio_tag || 'Hindi Dub';
+        document.getElementById('heroScore').textContent = `★ ${featured.score || '9.0'}`;
+        state.heroItem = featured;
       }
     }
 
-    async function loadDiscoverFeeds() {
-      const topRow = document.getElementById('top10Row');
-      const seasonalGrid = document.getElementById('seasonalGrid');
-      topRow.innerHTML = FALLBACK_ANIME.map((a, i) => animeCardHTML(a, i + 1)).join('');
-      seasonalGrid.innerHTML = FALLBACK_ANIME.map(a => animeCardHTML(a)).join('');
-
-      const [topData, seasonData] = await Promise.all([
-        fetchJikanCached('/top/anime?limit=10&sfw=true', FALLBACK_ANIME),
-        fetchJikanCached('/seasons/now?limit=10&sfw=true', FALLBACK_ANIME)
-      ]);
-      topRow.innerHTML = topData.map((a, i) => animeCardHTML(a, i + 1)).join('');
-      seasonalGrid.innerHTML = seasonData.map(a => animeCardHTML(a)).join('');
+    function playFeaturedHero() {
+      const item = state.heroItem || FALLBACK_ANIME[0];
+      openPlayer(encodeURIComponent(JSON.stringify(item)));
     }
 
-    // Explore Tab Filtering
-    async function filterExplore(genreId, btnEl = null) {
-      if (btnEl) {
-        document.querySelectorAll('#genrePills .genre-btn').forEach(b => {
-          b.className = 'genre-btn px-4 py-2 rounded-2xl text-xs font-semibold bg-white/10 hover:bg-white/15';
-        });
-        btnEl.className = 'genre-btn px-4 py-2 rounded-2xl text-xs font-bold btn-primary';
+    async function fetchJikanFeeds() {
+      try {
+        const [topRes, seasonRes] = await Promise.all([
+          fetch('https://api.jikan.moe/v4/top/anime?limit=10'),
+          fetch('https://api.jikan.moe/v4/seasons/now?limit=10')
+        ]);
+        const topData = await topRes.json();
+        const seasonData = await seasonRes.json();
+        document.getElementById('top10Row').innerHTML = (topData.data || FALLBACK_ANIME).map((a, i) => animeCardHTML(a, i + 1)).join('');
+        document.getElementById('seasonalGrid').innerHTML = (seasonData.data || FALLBACK_ANIME).map(a => animeCardHTML(a)).join('');
+      } catch {
+        document.getElementById('top10Row').innerHTML = FALLBACK_ANIME.map((a, i) => animeCardHTML(a, i + 1)).join('');
+        document.getElementById('seasonalGrid').innerHTML = FALLBACK_ANIME.map(a => animeCardHTML(a)).join('');
       }
+    }
+
+    // Search & Hidden Admin Path Intercept
+    let searchTimer;
+    const searchInput = document.getElementById('globalSearch');
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimer);
+      const raw = e.target.value.trim();
+      if (raw.toLowerCase().replace(/^#?\//, '') === 'aninex/path/admin') {
+        e.target.value = '';
+        openAdminPinGate();
+        return;
+      }
+      if (!raw) return;
+      searchTimer = setTimeout(async () => {
+        navigate('explore');
+        try {
+          const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(raw)}&limit=15`);
+          const data = await res.json();
+          document.getElementById('exploreGrid').innerHTML = (data.data || []).map(a => animeCardHTML(a)).join('');
+        } catch {}
+      }, 450);
+    });
+
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && searchInput.value.trim().toLowerCase().replace(/^#?\//, '') === 'aninex/path/admin') {
+        searchInput.value = '';
+        openAdminPinGate();
+      }
+    });
+
+    async function filterExplore(genreId) {
       const grid = document.getElementById('exploreGrid');
-      const status = document.getElementById('exploreStatus');
-      status.textContent = 'Fetching live catalog...';
-      grid.innerHTML = [...state.customAnime, ...FALLBACK_ANIME].map(a => animeCardHTML(a)).join('');
-
-      const endpoint = genreId === 'all'
-        ? '/top/anime?filter=bypopularity&limit=15&sfw=true'
-        : `/anime?genres=${genreId}&order_by=score&sort=desc&limit=15&sfw=true`;
-      const items = await fetchJikanCached(endpoint, FALLBACK_ANIME);
-      const merged = genreId === 'all' ? [...state.customAnime, ...items] : items;
-      status.textContent = `Showing ${merged.length} anime series`;
-      grid.innerHTML = merged.map(a => animeCardHTML(a)).join('');
+      grid.innerHTML = '<p class="text-xs text-gray-400 col-span-full">Loading anime catalog...</p>';
+      try {
+        const url = genreId === 'all'
+          ? 'https://api.jikan.moe/v4/top/anime?filter=bypopularity&limit=15'
+          : `https://api.jikan.moe/v4/anime?genres=${genreId}&order_by=score&sort=desc&limit=15`;
+        const res = await fetch(url);
+        const data = await res.json();
+        grid.innerHTML = (data.data || FALLBACK_ANIME).map(a => animeCardHTML(a)).join('');
+      } catch {
+        grid.innerHTML = FALLBACK_ANIME.map(a => animeCardHTML(a)).join('');
+      }
     }
 
-    // Schedule Tab (Monday - Sunday)
     async function loadSchedule(day) {
       const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
       document.getElementById('dayTabs').innerHTML = days.map(d =>
-        `<button type="button" onclick="loadSchedule('${d}')" class="px-4 py-2 rounded-2xl text-xs font-bold capitalize shrink-0 transition ${d === day ? 'btn-primary' : 'bg-white/10 hover:bg-white/15 text-slate-300'}">${d}</button>`
+        `<button onclick="loadSchedule('${d}')" class="px-4 py-1.5 rounded-full text-xs font-bold capitalize shrink-0 ${d === day ? 'btn-primary' : 'bg-white/10'}">${d}</button>`
       ).join('');
-
       const grid = document.getElementById('scheduleGrid');
-      grid.innerHTML = FALLBACK_ANIME.map(a => animeCardHTML(a)).join('');
-      const items = await fetchJikanCached(`/schedules?filter=${day}&limit=10&sfw=true`, FALLBACK_ANIME);
-      grid.innerHTML = items.map(a => animeCardHTML(a)).join('');
-    }
-
-    // Live Search Bar (Includes secret shortcut `aninex/path/admin`)
-    let searchTimer;
-    document.getElementById('globalSearch').addEventListener('input', (e) => {
-      const q = e.target.value.trim();
-      document.getElementById('clearSearchBtn').classList.toggle('hidden', !q);
-
-      if (q.toLowerCase() === 'aninex/path/admin') {
-        e.target.value = '';
-        document.getElementById('clearSearchBtn').classList.add('hidden');
-        if (state.adminUnlocked) navigate('admin');
-        else document.getElementById('adminPinModal').classList.remove('hidden');
-        return;
+      grid.innerHTML = '<p class="text-xs text-gray-400 col-span-full">Fetching simulcast schedule...</p>';
+      try {
+        const res = await fetch(`https://api.jikan.moe/v4/schedules?filter=${day}&limit=10`);
+        const data = await res.json();
+        grid.innerHTML = (data.data || FALLBACK_ANIME).map(a => animeCardHTML(a)).join('');
+      } catch {
+        grid.innerHTML = FALLBACK_ANIME.map(a => animeCardHTML(a)).join('');
       }
-
-      clearTimeout(searchTimer);
-      if (q.length < 2) return;
-      searchTimer = setTimeout(async () => {
-        navigate('explore');
-        document.getElementById('exploreStatus').textContent = `Searching for "${q}"...`;
-        const localMatches = state.customAnime.filter(a => a.title.toLowerCase().includes(q.toLowerCase()));
-        const apiMatches = await fetchJikanCached(`/anime?q=${encodeURIComponent(q)}&limit=12&sfw=true`, []);
-        const combined = [...localMatches, ...apiMatches];
-        document.getElementById('exploreStatus').textContent = `Found ${combined.length} results for "${q}"`;
-        document.getElementById('exploreGrid').innerHTML = combined.length
-          ? combined.map(a => animeCardHTML(a)).join('')
-          : '<p class="col-span-full text-xs text-slate-400">No matching anime found.</p>';
-      }, 420);
-    });
-
-    function clearSearchInput() {
-      const inp = document.getElementById('globalSearch');
-      inp.value = '';
-      document.getElementById('clearSearchBtn').classList.add('hidden');
     }
 
-    // =========================================================================
-    // 5. STREAMING PLAYER, EPISODE DOWNLOADS & MY LIST
-    // =========================================================================
-    let activeHls = null;
-
+    // ================= STREAMING PLAYER (MP4, HLS M3U8, & YOUTUBE EMBED) =================
     function openPlayer(encoded) {
       const anime = JSON.parse(decodeURIComponent(encoded));
       state.currentAnime = anime;
       document.getElementById('playerTitle').textContent = anime.title;
+      document.getElementById('playerAudioTag').textContent = anime.audio_tag;
       document.getElementById('playerSynopsis').textContent = anime.synopsis;
       document.getElementById('playerModal').classList.remove('hidden');
 
-      const eps = anime.episodes || [];
-      document.getElementById('playerEpisodesList').innerHTML = eps.map((ep, idx) => {
-        const epNum = ep.num || idx + 1;
-        const locked = !state.user.hasUnlimitedAccess && epNum > 1;
-        return `
-          <button type="button" onclick='playEpisode(${JSON.stringify(ep)})'
-            class="py-2.5 px-2 rounded-xl text-xs font-mono font-bold bg-white/10 hover:bg-[#FF2A5F] transition flex items-center justify-center gap-1">
-            <span>EP ${String(epNum).padStart(2, '0')}</span>
-            ${locked ? '<i class="ph-fill ph-lock-simple text-amber-400 text-[11px]"></i>' : ''}
-          </button>`;
-      }).join('');
+      const eps = Array.isArray(anime.episodes) && anime.episodes.length
+        ? anime.episodes
+        : [{ num: 1, title: 'Episode 1', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' }];
 
-      updatePlayerWatchlistBtn();
+      document.getElementById('playerEpisodesList').innerHTML = eps.map((ep, idx) =>
+        `<button onclick='playEpisode(${JSON.stringify(ep)})' class="py-2 px-3 rounded-xl text-xs font-bold bg-white/10 hover:bg-[#FF2A5F] transition">EP ${ep.num || idx + 1}</button>`
+      ).join('');
+
       playEpisode(eps[0]);
     }
 
     function playEpisode(ep) {
-      state.currentEpisode = ep;
-      const epNum = ep.num || 1;
-      document.getElementById('playerEpBadge').textContent = `EP ${String(epNum).padStart(2, '0')}`;
       const video = document.getElementById('html5Player');
+      const iframe = document.getElementById('embedPlayer');
       const lock = document.getElementById('playerLockOverlay');
+      const dlBtn = document.getElementById('downloadEpBtn');
 
-      // Record watch history
-      if (state.currentAnime) {
-        state.history = state.history.filter(h => h.mal_id !== state.currentAnime.mal_id);
-        state.history.unshift({ ...state.currentAnime, lastEp: epNum });
-        if (state.history.length > 15) state.history.pop();
-        persistLocalState();
-      }
+      video.pause();
+      video.classList.add('hidden');
+      iframe.classList.add('hidden');
+      iframe.src = '';
 
-      if (!state.user.hasUnlimitedAccess && epNum > 1) {
-        video.pause();
-        video.classList.add('hidden');
+      if (!hasUnlimitedAccess() && (ep.num || 1) > 1) {
         lock.classList.remove('hidden');
-        document.getElementById('lockedEpNum').textContent = epNum;
         document.getElementById('modalAdCount').textContent = state.user.adsWatchedToday || 0;
+        dlBtn.href = '#';
+        dlBtn.onclick = (e) => { e.preventDefault(); alert('Watch 3 Ads or activate ₹49/Mo VIP to download episodes!'); };
         return;
       }
 
       lock.classList.add('hidden');
-      video.classList.remove('hidden');
+      dlBtn.href = ep.url;
+      dlBtn.onclick = null;
 
-      if (activeHls) { activeHls.destroy(); activeHls = null; }
-      if (ep.url && ep.url.includes('.m3u8') && window.Hls && Hls.isSupported()) {
-        activeHls = new Hls();
-        activeHls.loadSource(ep.url);
-        activeHls.attachMedia(video);
+      if (ep.url.includes('youtube.com/embed') || ep.url.includes('youtu.be')) {
+        let embedUrl = ep.url;
+        if (ep.url.includes('youtu.be/')) {
+          const id = ep.url.split('youtu.be/')[1].split('?')[0];
+          embedUrl = `https://www.youtube.com/embed/${id}`;
+        }
+        iframe.src = embedUrl;
+        iframe.classList.remove('hidden');
       } else {
-        video.src = ep.url;
+        video.classList.remove('hidden');
+        if (ep.url.includes('.m3u8') && Hls.isSupported()) {
+          const hls = new Hls();
+          hls.loadSource(ep.url);
+          hls.attachMedia(video);
+        } else {
+          video.src = ep.url;
+        }
+        video.play().catch(() => {});
       }
-      video.play().catch(() => {});
     }
 
     function closePlayer() {
-      const video = document.getElementById('html5Player');
-      video.pause();
-      if (activeHls) { activeHls.destroy(); activeHls = null; }
+      document.getElementById('html5Player').pause();
+      document.getElementById('embedPlayer').src = '';
       document.getElementById('playerModal').classList.add('hidden');
     }
 
-    function setPlayerAudio(label, btn) {
-      document.querySelectorAll('.p-audio-btn').forEach(b => b.className = 'p-audio-btn px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/10');
-      btn.className = 'p-audio-btn px-3 py-1.5 rounded-xl text-xs font-bold btn-primary';
-      showToast(`Switched audio track to ${label}`);
-    }
-
-    function downloadCurrentEpisode() {
-      if (!state.user.hasUnlimitedAccess) {
-        showToast('Watch 3 Ads or activate ₹49/mo VIP to download!', 'text-amber-300');
-        return;
-      }
-      if (!state.currentEpisode || !state.currentEpisode.url) return;
-      const a = document.createElement('a');
-      a.href = state.currentEpisode.url;
-      a.download = `${state.currentAnime?.title || 'AniNex'}-EP${state.currentEpisode.num || 1}.mp4`;
-      a.target = '_blank';
-      a.click();
-      showToast(`Downloading ${state.currentAnime?.title} EP ${state.currentEpisode.num || 1}...`);
-    }
-
-    function toggleWatchlistCurrent() {
-      if (!state.currentAnime) return;
-      const idx = state.watchlist.findIndex(w => w.mal_id === state.currentAnime.mal_id);
-      if (idx >= 0) {
-        state.watchlist.splice(idx, 1);
-        showToast('Removed from My List');
-      } else {
-        state.watchlist.unshift(state.currentAnime);
-        showToast('Saved to My List!');
-      }
-      persistLocalState();
-      updatePlayerWatchlistBtn();
-    }
-
-    function updatePlayerWatchlistBtn() {
-      const btn = document.getElementById('playerWatchlistBtn');
-      const saved = state.currentAnime && state.watchlist.some(w => w.mal_id === state.currentAnime.mal_id);
-      btn.innerHTML = saved
-        ? '<i class="ph-fill ph-check text-emerald-400"></i> <span>Saved in My List</span>'
-        : '<i class="ph-bold ph-bookmark-simple"></i> <span>Save to My List</span>';
-    }
-
-    function renderMyListView() {
-      normalizeUserPassState();
-      const summary = document.getElementById('myListPassSummary');
-      summary.innerHTML = `
-        <div>
-          <span class="text-[11px] font-mono font-bold text-[#00F0FF]">CURRENT ACCOUNT ACCESS</span>
-          <h3 class="text-lg font-extrabold mt-0.5">
-            ${state.user.isVip ? '👑 VIP Unlimited Pass Active' : (state.user.hasAdPass ? '⚡ 24-Hour 3-Ad Pass Active' : `Free Tier (${state.user.adsWatchedToday}/3 Ads Watched)`)}
-          </h3>
-          <p class="text-xs text-slate-400">
-            ${state.user.hasUnlimitedAccess ? 'All VIP episodes & direct downloads are unlocked.' : 'Complete 3 ads or activate ₹49/Month VIP via UPI (9226014759@fam).'}
-          </p>
-        </div>
-        <button type="button" onclick="navigate('vip')" class="px-5 py-2.5 rounded-2xl text-xs font-extrabold btn-primary">
-          ${state.user.hasUnlimitedAccess ? 'Extend Pass' : 'Unlock Unlimited'}
-        </button>`;
-
-      document.getElementById('watchlistGrid').innerHTML = state.watchlist.length
-        ? state.watchlist.map(a => animeCardHTML(a)).join('')
-        : '<p class="col-span-full text-xs text-slate-400 glass-card p-5 rounded-2xl">Your watchlist is empty. Open any anime and tap "Save to My List".</p>';
-
-      document.getElementById('historyGrid').innerHTML = state.history.length
-        ? state.history.map(a => animeCardHTML(a)).join('')
-        : '<p class="col-span-full text-xs text-slate-400 glass-card p-5 rounded-2xl">No recently watched anime yet.</p>';
-    }
-
-    function clearWatchHistory() {
-      state.history = [];
-      persistLocalState();
-      renderMyListView();
-      showToast('Watch history cleared');
-    }
-
-    // =========================================================================
-    // 6. 3-AD DAILY UNLOCK ENGINE & ₹49/MONTH UPI CHECKOUT (9226014759@fam)
-    // =========================================================================
-    let adInterval = null;
-
-    function openSponsorAdModal(fromPlayer = false) {
-      state.resumeAfterAd = fromPlayer;
-      const step = Math.min(3, (state.user.adsWatchedToday || 0) + 1);
-      document.getElementById('adStepNum').textContent = step;
-      document.getElementById('adProgressBar').style.width = '0%';
-      const claimBtn = document.getElementById('claimAdBtn');
-      claimBtn.disabled = true;
-      claimBtn.className = 'flex-1 py-3 rounded-xl text-xs font-extrabold bg-white/10 text-slate-400 cursor-not-allowed';
-      claimBtn.textContent = 'Wait 5s to Claim Credit...';
-
-      document.getElementById('sponsorAdModal').classList.remove('hidden');
-
-      let sec = 5;
-      document.getElementById('adCountdownText').textContent = '05s remaining';
-      clearInterval(adInterval);
-      adInterval = setInterval(() => {
-        sec--;
-        const pct = Math.min(100, ((5 - sec) / 5) * 100);
-        document.getElementById('adProgressBar').style.width = `${pct}%`;
-        document.getElementById('adCountdownText').textContent = `0${Math.max(0, sec)}s remaining`;
-        if (sec <= 0) {
-          clearInterval(adInterval);
-          claimBtn.disabled = false;
-          claimBtn.className = 'flex-1 py-3 rounded-xl text-xs font-extrabold btn-cyber cursor-pointer';
-          claimBtn.textContent = `✓ Claim Ad Credit (${step}/3)`;
-        }
-      }, 1000);
-    }
-
-    function closeSponsorAdModal() {
-      clearInterval(adInterval);
-      document.getElementById('sponsorAdModal').classList.add('hidden');
-    }
-
-    function claimAdCredit() {
-      closeSponsorAdModal();
-      state.user.lastAdDate = new Date().toDateString();
+    // ================= 3-AD UNLOCK & ₹49/MO UPI PAYMENTS =================
+    function watchSponsorAd() {
+      alert('🎬 Sponsor Ad Played! Click OK to claim +1 Ad credit.');
       state.user.adsWatchedToday = Math.min(3, (state.user.adsWatchedToday || 0) + 1);
-
       if (state.user.adsWatchedToday >= 3) {
         state.user.adPassUntil = Date.now() + 24 * 60 * 60 * 1000;
-        showToast('🎉 3/3 Ads Completed! 24-Hour Unlimited Pass Unlocked!');
-      } else {
-        showToast(`Ad Credit Claimed (${state.user.adsWatchedToday}/3)!`);
+        alert('🎉 3/3 Ads Completed! 24-Hour Unlimited Streaming & Downloads Unlocked!');
       }
-
-      normalizeUserPassState();
+      saveUserState();
       applyThemeAndPass();
-
-      if (state.resumeAfterAd && state.currentAnime && state.currentEpisode) {
-        openPlayer(encodeURIComponent(JSON.stringify(state.currentAnime)));
-        playEpisode(state.currentEpisode);
-      }
     }
 
     function openUpiModal(planName, amount, durationDays) {
       state.selectedPlan = { planName, amount, durationDays };
-      const upiId = state.settings.upiId || '9226014759@fam';
+      const upiId = '9226014759@fam';
       const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent('AniNex VIP')}&am=${amount}&cu=INR&tn=${encodeURIComponent(planName)}`;
 
       document.getElementById('upiPlanTitle').textContent = `${planName} (₹${amount})`;
       document.getElementById('upiPayAmt').textContent = amount;
       document.getElementById('upiDeepLink').href = upiUri;
       document.getElementById('upiQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(upiUri)}`;
-      document.getElementById('upiUtrInput').value = '';
       document.getElementById('upiModal').classList.remove('hidden');
-    }
-
-    function copyUpiId() {
-      const ta = document.createElement('textarea');
-      ta.value = '9226014759@fam';
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('Copied UPI ID: 9226014759@fam');
     }
 
     function submitUpiUtr() {
       const utr = document.getElementById('upiUtrInput').value.trim();
-      const payerName = document.getElementById('upiPayerName').value.trim() || 'AniNex User';
-      if (!/^\d{12}$/.test(utr)) {
-        showToast('Please enter a valid 12-digit UPI UTR number!', 'text-rose-400');
-        return;
-      }
+      const payer = document.getElementById('upiPayerName').value.trim() || 'AniNex User';
+      if (!/^\d{12}$/.test(utr)) return alert('Please enter a valid 12-digit UPI UTR Reference Number.');
 
       state.payments.unshift({
         id: Date.now(),
-        deviceId: DEVICE_ID,
-        planName: state.selectedPlan.planName,
-        amount: state.selectedPlan.amount,
-        durationDays: state.selectedPlan.durationDays,
-        utrNumber: utr,
-        payerName,
-        status: 'PENDING',
-        createdAt: new Date().toLocaleString()
+        ...state.selectedPlan,
+        utr,
+        payer,
+        status: 'PENDING'
       });
-      persistLocalState();
+      localStorage.setItem('aninex_payments', JSON.stringify(state.payments));
       document.getElementById('upiModal').classList.add('hidden');
+      alert('Payment UTR submitted! Open Admin Studio (PIN: 38729) to approve and activate VIP.');
       renderMyPayments();
-      showToast('UTR Submitted! Admin will verify your payment to 9226014759@fam.');
     }
 
     function renderMyPayments() {
       const box = document.getElementById('myPaymentsList');
-      if (!state.payments.length) {
-        box.innerHTML = 'No UPI payments submitted yet.';
-        return;
-      }
+      if (!state.payments.length) return;
       box.innerHTML = state.payments.map(p => `
-        <div class="flex flex-wrap items-center justify-between gap-2 py-2.5 border-b border-white/10">
-          <div>
-            <span class="font-bold text-white">${escapeHtml(p.planName)}</span> (₹${p.amount}) • UTR: <code class="text-[#00F0FF]">${p.utrNumber}</code>
-          </div>
-          <span class="px-2.5 py-0.5 rounded-lg font-mono font-bold ${p.status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-300' : (p.status === 'REJECTED' ? 'bg-rose-500/20 text-rose-300' : 'bg-amber-500/20 text-amber-300')}">${p.status}</span>
+        <div class="flex items-center justify-between py-2 border-b border-white/10">
+          <div><span class="font-bold text-white">${p.planName}</span> • UTR: <code>${p.utr}</code></div>
+          <span class="px-2 py-0.5 rounded font-bold ${p.status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300'}">${p.status}</span>
         </div>`).join('');
     }
 
-    function applyThemeAndPass() {
-      normalizeUserPassState();
-      document.documentElement.style.setProperty('--primary', state.settings.primaryColor || '#FF2A5F');
-      document.documentElement.style.setProperty('--accent', state.settings.accentColor || '#00F0FF');
-      document.getElementById('announcementBar').textContent = state.settings.bannerText;
-
-      const pill = document.getElementById('passPillText');
-      const dot = document.getElementById('passDot');
-      const adBadge = document.getElementById('adProgressBadge');
-      const watchBtn = document.getElementById('watchAdBtn');
-      const nodesGrid = document.getElementById('adNodesGrid');
-
-      const count = state.user.adsWatchedToday || 0;
-      if (state.user.isVip) {
-        pill.textContent = '👑 VIP Unlimited';
-        dot.className = 'w-2 h-2 rounded-full bg-amber-400';
-        adBadge.textContent = 'VIP Active — Ads Disabled';
-        watchBtn.textContent = '👑 VIP Pass Active';
-      } else if (state.user.hasAdPass) {
-        pill.textContent = '⚡ 24h Pass Active';
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-400';
-        adBadge.textContent = '3 / 3 Ads Completed (24h Unlocked!)';
-        watchBtn.textContent = '✓ 24h Unlimited Unlocked';
-      } else {
-        pill.textContent = `Free (${count}/3 Ads)`;
-        dot.className = 'w-2 h-2 rounded-full bg-amber-400 animate-pulse';
-        adBadge.textContent = `${count} / 3 Ads Completed Today`;
-        watchBtn.innerHTML = `<i class="ph-fill ph-play-circle text-lg"></i> Watch Sponsor Ad (${count + 1}/3)`;
-      }
-
-      if (nodesGrid) {
-        nodesGrid.innerHTML = [1, 2, 3].map(step => {
-          const done = step <= count || state.user.hasUnlimitedAccess;
-          return `
-            <div class="p-3 rounded-2xl ${done ? 'bg-[#00F0FF]/15 border border-[#00F0FF]/40' : 'bg-white/[0.04] border border-white/10'} flex items-center gap-2.5">
-              <span class="w-7 h-7 rounded-xl ${done ? 'bg-[#00F0FF] text-black' : 'bg-white/10 text-slate-400'} font-mono font-extrabold text-xs flex items-center justify-center">
-                ${done ? '✓' : step}
-              </span>
-              <span class="text-xs font-bold ${done ? 'text-white' : 'text-slate-400'}">Ad #${step}</span>
-            </div>`;
-        }).join('');
-      }
+    // Watchlist
+    function toggleWatchlistCurrent() {
+      if (!state.currentAnime) return;
+      state.watchlist.push(state.currentAnime);
+      localStorage.setItem('aninex_watchlist', JSON.stringify(state.watchlist));
+      alert('Saved to My Watchlist!');
+    }
+    function renderWatchlist() {
+      document.getElementById('watchlistGrid').innerHTML = state.watchlist.map(a => animeCardHTML(a)).join('') || '<p class="text-xs text-gray-400">Your watchlist is empty.</p>';
     }
 
-    // =========================================================================
-    // 7. ADMIN STUDIO ACTIONS (AUTO-FETCH, PUBLISH, APPROVE ₹49 UPI, THEME)
-    // =========================================================================
-    function switchAdminTab(tab, btn) {
-      ['upload', 'payments', 'theme'].forEach(t => document.getElementById(`admin-tab-${t}`).classList.add('hidden'));
+    // ================= ADMIN STUDIO ACTIONS =================
+    function switchAdminTab(tab) {
+      ['upload', 'payments', 'theme'].forEach(t => {
+        document.getElementById(`admin-tab-${t}`).classList.add('hidden');
+        document.getElementById(`tabBtn-${t}`).classList.remove('btn-primary');
+        document.getElementById(`tabBtn-${t}`).classList.add('bg-white/10');
+      });
       document.getElementById(`admin-tab-${tab}`).classList.remove('hidden');
-      document.querySelectorAll('.admin-tab').forEach(b => b.className = 'admin-tab px-4 py-2.5 rounded-2xl text-xs font-bold bg-white/10');
-      if (btn) btn.className = 'admin-tab px-4 py-2.5 rounded-2xl text-xs font-bold btn-primary';
-      if (tab === 'payments') loadAdminPayments();
-      if (tab === 'upload') renderAdminCustomAnimeList();
+      document.getElementById(`tabBtn-${tab}`).classList.add('btn-primary');
+      document.getElementById(`tabBtn-${tab}`).classList.remove('bg-white/10');
+      renderAdminLists();
     }
 
     async function adminAutoFetch() {
       const q = document.getElementById('adminFetchQuery').value.trim();
-      if (!q) return showToast('Enter an anime title or MAL ID first');
-      showToast('Fetching metadata from MyAnimeList...');
-      const endpoint = /^\d+$/.test(q) ? `/anime/${q}` : `/anime?q=${encodeURIComponent(q)}&limit=1`;
-      try {
-        const res = await fetch(`https://api.jikan.moe/v4${endpoint}`);
-        const json = await res.json();
-        const a = Array.isArray(json.data) ? json.data[0] : json.data;
-        if (!a) return showToast('Anime not found', 'text-rose-400');
-        document.getElementById('upTitle').value = a.title_english || a.title;
-        document.getElementById('upPoster').value = a.images?.jpg?.large_image_url || '';
-        document.getElementById('upBanner').value = a.trailer?.images?.maximum_image_url || a.images?.jpg?.large_image_url || '';
-        document.getElementById('upSynopsis').value = a.synopsis || '';
-        showToast(`Auto-filled "${a.title_english || a.title}"!`);
-      } catch {
-        showToast('Could not fetch right now, please enter manually', 'text-rose-400');
-      }
+      if (!q) return;
+      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(q)}&limit=1`);
+      const { data } = await res.json();
+      if (!data || !data[0]) return alert('Anime not found');
+      const a = data[0];
+      document.getElementById('upTitle').value = a.title_english || a.title;
+      document.getElementById('upPoster').value = a.images?.jpg?.large_image_url || '';
+      document.getElementById('upBanner').value = a.trailer?.images?.maximum_image_url || a.images?.jpg?.large_image_url || '';
+      document.getElementById('upSynopsis').value = a.synopsis || '';
     }
 
     function addEpisodeRow() {
@@ -1389,126 +933,93 @@
       div.innerHTML = `
         <input type="number" value="${count}" class="col-span-2 bg-white/5 border border-white/10 rounded-lg px-2 py-2 text-xs ep-num" />
         <input type="text" value="Episode ${count}" class="col-span-4 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs ep-title" />
-        <input type="text" value="https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8" class="col-span-6 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs ep-url" />`;
+        <input type="text" class="col-span-6 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs ep-url" placeholder="Paste .mp4, .m3u8, or YouTube embed URL" />`;
       document.getElementById('episodeInputs').appendChild(div);
     }
 
     function publishCustomAnime() {
       const title = document.getElementById('upTitle').value.trim();
-      if (!title) return showToast('Anime title is required', 'text-rose-400');
+      if (!title) return alert('Please enter an anime title.');
 
       const episodes = Array.from(document.querySelectorAll('.ep-row')).map(row => ({
-        num: Number(row.querySelector('.ep-num').value) || 1,
-        title: row.querySelector('.ep-title').value.trim() || 'Episode',
+        num: Number(row.querySelector('.ep-num').value),
+        title: row.querySelector('.ep-title').value,
         url: row.querySelector('.ep-url').value.trim()
       })).filter(e => e.url);
 
-      const newAnime = {
+      state.customAnime.unshift({
         id: Date.now(),
-        mal_id: Date.now(),
         title,
         audio_tag: document.getElementById('upAudio').value.trim() || 'Hindi Dub',
-        poster: document.getElementById('upPoster').value.trim() || `https://placehold.co/400x600/141627/FF2A5F?text=${encodeURIComponent(title)}`,
+        poster: document.getElementById('upPoster').value.trim() || FALLBACK_ANIME[0].poster,
         banner: document.getElementById('upBanner').value.trim() || document.getElementById('upPoster').value.trim(),
-        synopsis: document.getElementById('upSynopsis').value.trim() || 'Exclusive upload on AniNex.',
-        score: 9.2,
-        year: 2026,
+        synopsis: document.getElementById('upSynopsis').value.trim() || 'Stream in Full HD on AniNex.',
         featured: document.getElementById('upFeatured').checked,
+        score: 9.0,
+        year: 2026,
         episodes: episodes.length ? episodes : [{ num: 1, title: 'Episode 1', url: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8' }]
-      };
+      });
 
-      state.customAnime.unshift(newAnime);
-      persistLocalState();
+      localStorage.setItem('aninex_custom_anime', JSON.stringify(state.customAnime));
       renderExclusives();
-      renderAdminCustomAnimeList();
-      showToast(`"${title}" is now LIVE on AniNex!`);
-    }
-
-    function renderAdminCustomAnimeList() {
-      const box = document.getElementById('adminCustomAnimeList');
-      box.innerHTML = state.customAnime.map(a => `
-        <div class="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/10">
-          <div>
-            <span class="font-bold text-white">${escapeHtml(a.title)}</span>
-            <span class="text-slate-400 ml-2">(${a.audio_tag} • ${a.episodes?.length || 1} EPs)</span>
-          </div>
-          <button type="button" onclick="deleteCustomAnime(${a.mal_id})" class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 font-bold">Delete</button>
-        </div>`).join('');
+      renderAdminLists();
+      alert('🚀 Anime published live to AniNex!');
     }
 
     function deleteCustomAnime(id) {
-      state.customAnime = state.customAnime.filter(a => a.mal_id !== id);
-      persistLocalState();
+      state.customAnime = state.customAnime.filter(a => a.id !== id);
+      localStorage.setItem('aninex_custom_anime', JSON.stringify(state.customAnime));
       renderExclusives();
-      renderAdminCustomAnimeList();
-      showToast('Deleted anime');
+      renderAdminLists();
     }
 
-    function loadAdminPayments() {
-      const box = document.getElementById('adminPaymentsList');
-      if (!state.payments.length) {
-        box.innerHTML = '<p class="text-slate-400">No UPI subscription payments submitted yet.</p>';
-        return;
-      }
-      box.innerHTML = state.payments.map(p => `
-        <div class="p-4 rounded-2xl bg-white/5 border border-white/10 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <p class="font-bold text-sm text-white">${escapeHtml(p.planName)} — ₹${p.amount} (${p.durationDays} Days)</p>
-            <p class="text-slate-400 font-mono">UTR: <span class="text-[#00F0FF] font-bold">${p.utrNumber}</span> • Payer: ${escapeHtml(p.payerName)}</p>
-          </div>
-          <div class="flex gap-2">
-            ${p.status === 'PENDING' ? `
-              <button type="button" onclick="handlePaymentAction(${p.id}, 'APPROVED')" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 text-black font-extrabold">✓ Approve VIP</button>
-              <button type="button" onclick="handlePaymentAction(${p.id}, 'REJECTED')" class="px-3.5 py-1.5 rounded-xl bg-rose-500/20 text-rose-300 font-bold">✕ Reject</button>
-            ` : `<span class="font-mono font-bold ${p.status === 'APPROVED' ? 'text-emerald-400' : 'text-rose-400'}">${p.status}</span>`}
-          </div>
-        </div>`).join('');
-    }
-
-    function handlePaymentAction(paymentId, status) {
-      const payment = state.payments.find(p => p.id === paymentId);
-      if (!payment) return;
-      payment.status = status;
-
-      if (status === 'APPROVED') {
-        const base = Math.max(Date.now(), state.user.vipUntil || 0);
-        state.user.vipUntil = base + payment.durationDays * 24 * 60 * 60 * 1000;
-        normalizeUserPassState();
+    function approveUpiPayment(id) {
+      const p = state.payments.find(x => x.id === id);
+      if (p) {
+        p.status = 'APPROVED';
+        state.user.isVip = true;
+        saveUserState();
+        localStorage.setItem('aninex_payments', JSON.stringify(state.payments));
         applyThemeAndPass();
-        showToast(`Approved ${payment.planName}! VIP Unlocked!`);
-      } else {
-        showToast('Payment Rejected', 'text-rose-400');
+        renderAdminLists();
+        alert('VIP Activated!');
       }
-      persistLocalState();
-      loadAdminPayments();
+    }
+
+    function renderAdminLists() {
+      document.getElementById('adminAnimeList').innerHTML = state.customAnime.map(a => `
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5">
+          <span><strong>${a.title}</strong> (${a.episodes.length} Eps)</span>
+          <button onclick="deleteCustomAnime(${a.id})" class="text-red-400 font-bold">Delete</button>
+        </div>`).join('') || '<p class="text-gray-500">No custom anime added yet.</p>';
+
+      document.getElementById('adminPaymentsList').innerHTML = state.payments.map(p => `
+        <div class="p-4 rounded-2xl bg-white/5 flex items-center justify-between">
+          <div>
+            <p class="font-bold">${p.planName} — ₹${p.amount}</p>
+            <p class="text-gray-400">UTR: <span class="text-[#00F0FF] font-bold">${p.utr}</span> • ${p.payer}</p>
+          </div>
+          ${p.status === 'PENDING'
+            ? `<button onclick="approveUpiPayment(${p.id})" class="px-3 py-1.5 rounded-lg bg-emerald-500 text-black font-bold">✓ Approve VIP</button>`
+            : `<span class="text-emerald-400 font-bold">${p.status}</span>`}
+        </div>`).join('') || '<p class="text-gray-500">No UPI UTR submissions yet.</p>';
     }
 
     function saveAdminSettings() {
       state.settings.primaryColor = document.getElementById('setPrimary').value;
       state.settings.accentColor = document.getElementById('setAccent').value;
-      state.settings.bannerText = document.getElementById('setBanner').value.trim() || state.settings.bannerText;
-      persistLocalState();
+      state.settings.bannerText = document.getElementById('setBanner').value;
+      localStorage.setItem('aninex_settings', JSON.stringify(state.settings));
       applyThemeAndPass();
-      showToast('Live Theme & Banner Updated!');
+      alert('Theme & Banner saved!');
     }
 
-    // =========================================================================
-    // 8. INITIALIZATION
-    // =========================================================================
+    // Boot
     window.addEventListener('hashchange', checkAdminRoute);
-    document.getElementById('adminPinInput').addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') verifyAdminPin();
-    });
-
-    (function initAniNex() {
-      document.getElementById('setPrimary').value = state.settings.primaryColor;
-      document.getElementById('setAccent').value = state.settings.accentColor;
-      document.getElementById('setBanner').value = state.settings.bannerText;
-      applyThemeAndPass();
-      renderExclusives();
-      loadDiscoverFeeds();
-      checkAdminRoute();
-    })();
+    applyThemeAndPass();
+    renderExclusives();
+    fetchJikanFeeds();
+    checkAdminRoute();
   </script>
 </body>
 </html>
